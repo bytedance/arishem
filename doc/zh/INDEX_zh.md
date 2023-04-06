@@ -14,6 +14,10 @@
 
 [Aim类型](./AIM_zh.md)
 
+### 4. 使用builder创建arishem表达式
+
+[使用builder创建arishem表达式](./BUILDER_zh.md)
+
 ## 自定义优先级和执行顺序
 
 [Arishem规则运算](./RULE_zh.md)。

@@ -23,7 +23,7 @@ import (
 
 func BenchmarkConditionVisitNoFact(b *testing.B) {
 	cdtExpr := `{"OpLogic":"||","Conditions":[{"Operator":"<=","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"<=","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"<=","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"<=","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}},{"Operator":">","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}}]}`
-	cdtCtx, _ := parser.ParseArishemCondition(cdtExpr, nil)
+	cdtCtx, _ := parser.ParseArishemCondition(cdtExpr)
 	aruleV := NewArishemRuleVisitor()
 	dc, _ := NewArishemDataCtx("{}", &testFeatureFetcher{})
 	for i := 0; i < b.N; i++ {
@@ -33,7 +33,7 @@ func BenchmarkConditionVisitNoFact(b *testing.B) {
 
 func BenchmarkConditionVisitFactVar(b *testing.B) {
 	cdtExpr := `{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"number1"},"Rhs":{"VarExpr":"numbers#0"}},{"Operator":"<=","Lhs":{"VarExpr":"numbers#1"},"Rhs":{"VarExpr":"numbers#0"}},{"Operator":">","Lhs":{"VarExpr":"numbers#2"},"Rhs":{"VarExpr":"numbers#0"}}]}`
-	cdtCtx, _ := parser.ParseArishemCondition(cdtExpr, nil)
+	cdtCtx, _ := parser.ParseArishemCondition(cdtExpr)
 	aruleV := NewArishemRuleVisitor()
 	dc, _ := NewArishemDataCtx(`{"number1":100,"numbers":["10",1,99.9]}`, &testFeatureFetcher{})
 	for i := 0; i < b.N; i++ {

@@ -16,6 +16,8 @@
 
 package arishem
 
+import "github.com/bytedance/sonic"
+
 // NewParamMapAction create a new action aim with param map.
 func NewParamMapAction(name string, param map[string]*Expr) *ActionAim {
 	return &ActionAim{ActionName: name, ParamMap: param, aaType: actionAimTypeParamMap}
@@ -31,6 +33,10 @@ type ActionAim struct {
 	ActionName string           `json:"ActionName"`
 	ParamMap   map[string]*Expr `json:"ParamMap,omitempty"`
 	ParamList  []*Expr          `json:"ParamList,omitempty"`
+}
+
+func (a *ActionAim) Build() (string, error) {
+	return sonic.MarshalString(a)
 }
 
 func (a *ActionAim) AddKeyParam(key string, val *Expr) {

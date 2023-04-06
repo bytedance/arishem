@@ -25,7 +25,7 @@ import (
 )
 
 //ParseArishemCondition parse condition group context from expression string, return an error if syntax is not valid.
-func ParseArishemCondition(expr string, po typedef.ParseObserver) (ICondEntityContext, error) {
+func ParseArishemCondition(expr string, pos ...typedef.ParseObserver) (ICondEntityContext, error) {
 	// parse listener
 	cl := NewCachedListener()
 
@@ -43,8 +43,8 @@ func ParseArishemCondition(expr string, po typedef.ParseObserver) (ICondEntityCo
 
 	// add cached parse listener first
 	ruleParser.AddParseListener(cl)
-	if po != nil {
-		cl.AddListenerProxy(po)
+	if len(pos) > 0 {
+		cl.AddListenerProxy(pos...)
 	}
 	// parse condition
 	condGroupCtx := ruleParser.CondEntity()
@@ -56,7 +56,7 @@ func ParseArishemCondition(expr string, po typedef.ParseObserver) (ICondEntityCo
 }
 
 // ParseArishemAim parse aim context from expression string, return an error if syntax is not valid.
-func ParseArishemAim(expr string, po typedef.ParseObserver) (IAimEntityContext, error) {
+func ParseArishemAim(expr string, pos ...typedef.ParseObserver) (IAimEntityContext, error) {
 	// parse listener
 	cl := NewCachedListener()
 
@@ -74,8 +74,8 @@ func ParseArishemAim(expr string, po typedef.ParseObserver) (IAimEntityContext, 
 
 	// add cached parse listener first
 	ruleParser.AddParseListener(cl)
-	if po != nil {
-		cl.AddListenerProxy(po)
+	if len(pos) > 0 {
+		cl.AddListenerProxy(pos...)
 	}
 	// parse aim
 	aimCtx := ruleParser.AimEntity()

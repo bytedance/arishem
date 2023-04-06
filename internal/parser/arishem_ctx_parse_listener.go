@@ -72,14 +72,22 @@ func (c *CachedListener) ExitEveryRule(ctx antlr.ParserRuleContext) {
 	}
 }
 
-func (c *CachedListener) AddListenerProxy(al typedef.ParseObserver) {
-	if al == nil {
+func (c *CachedListener) AddListenerProxy(pos ...typedef.ParseObserver) {
+	if len(pos) <= 0 {
+		return
+	}
+	if pos == nil {
 		return
 	}
 	if c.proxy == nil {
 		c.proxy = make([]typedef.ParseObserver, 0, 4)
 	}
-	c.proxy = append(c.proxy, al)
+	for _, po := range pos {
+		if po == nil {
+			continue
+		}
+		c.proxy = append(c.proxy, pos...)
+	}
 }
 
 func (c *CachedListener) CheckSyntaxValid() bool {

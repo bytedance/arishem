@@ -24,29 +24,6 @@ import (
 	"testing"
 )
 
-/*func TestGovaluate(t *testing.T) {
-	mathExpr, err := govaluate.NewEvaluableExpression("1/2+3*8")
-	if err != nil {
-		t.Fatal(err)
-	}
-	val, err := mathExpr.Evaluate(nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	println(math.IsInf(val.(float64), 0))
-	fmt.Printf("%v\n%T\n", val, val)
-	t.Log(val)
-}*/
-
-type testFeatureParam struct {
-}
-
-func (t *testFeatureParam) HashCode() string { return "" }
-
-func (t *testFeatureParam) FeatureName() string { return "" }
-
-func (t *testFeatureParam) BuiltinParam() typedef.MetaType { return nil }
-
 type testFeatureFetcher struct {
 }
 
@@ -238,22 +215,16 @@ func TestConditionVisit(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Log(tc.name)
-		cdtCtx, err := parser.ParseArishemCondition(tc.expr, nil)
-		if err != nil {
-			t.Log(err.Error())
-		} else {
-			dc, err := NewArishemDataCtx(tc.fact, nil)
-			if err != nil {
-				t.Log(err)
-			} else {
-				arisVst := NewArishemRuleVisitor()
-				tavo := &testArisVisitObserver{hash: tc.name}
-				arisVst.AddVisitObserver(tavo)
+		cdtCtx, err := parser.ParseArishemCondition(tc.expr)
+		assert.Nil(t, err)
+		dc, err := NewArishemDataCtx(tc.fact, &testFeatureFetcher{})
+		assert.Nil(t, err)
+		arisVst := NewArishemRuleVisitor()
+		tavo := &testArisVisitObserver{hash: tc.name}
+		arisVst.AddVisitObserver(tavo)
 
-				pass := arisVst.VisitCondition(cdtCtx, dc, newArisVisitTarget(tc.name))
-				tc.check(pass, tavo.errMsgs)
-			}
-		}
+		pass := arisVst.VisitCondition(cdtCtx, dc, newArisVisitTarget(tc.name))
+		tc.check(pass, tavo.errMsgs)
 	}
 }
 
@@ -348,7 +319,7 @@ func TestAimVisit(t *testing.T) {
 			func(aim typedef.Aim, errMsg []string) {
 				assert.Empty(t, errMsg)
 				assert.NotNil(t, aim)
-				aim.AsAction().ParamAsMap()
+				assert.Nil(t, aim.AsAction())
 				expr := aim.AsExpr()
 				assert.NotNil(t, expr)
 				mapExpr, ok := expr.(map[string]interface{})
@@ -362,18 +333,15 @@ func TestAimVisit(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Log(tc.name)
-		cdtCtx, err := parser.ParseArishemAim(tc.expr, nil)
+		cdtCtx, err := parser.ParseArishemAim(tc.expr)
 		assert.Nil(t, err)
-		dc, err := NewArishemDataCtx(tc.fact, nil)
-		if err != nil {
-			t.Log(err)
-		} else {
-			arisVst := NewArishemRuleVisitor()
-			tavo := &testArisVisitObserver{hash: tc.name}
-			arisVst.AddVisitObserver(tavo)
+		dc, err := NewArishemDataCtx(tc.fact, &testFeatureFetcher{})
+		assert.Nil(t, err)
+		arisVst := NewArishemRuleVisitor()
+		tavo := &testArisVisitObserver{hash: tc.name}
+		arisVst.AddVisitObserver(tavo)
 
-			aim := arisVst.VisitAim(cdtCtx, dc, newArisVisitTarget(tc.name))
-			tc.check(aim, tavo.errMsgs)
-		}
+		aim := arisVst.VisitAim(cdtCtx, dc, newArisVisitTarget(tc.name))
+		tc.check(aim, tavo.errMsgs)
 	}
 }

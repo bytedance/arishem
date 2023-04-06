@@ -26,7 +26,7 @@ import (
 func BenchmarkCdtParse(b *testing.B) {
 	cdtExpr := `{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"upgrade_time"},"Rhs":{"ListExpr":[{"FeatureExpr":{"FeaturePath":"user.username"}},{"FeatureExpr":{"FeaturePath":"user.username","BuiltinParam":{"QueryNameRange":{"ConstList":[{"StrConst":"Mike"},{"StrConst":"Jack"},{"StrConst":"Andrew"},{"StrConst":"John"}]},"AgeCalculated":{"MathExpr":{"OpMath":"+","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":10}}}}}}},{"FeatureExpr":{"FeaturePath":"user_profile.username"}},{"FeatureExpr":{"FeaturePath":"user_profile.username","BuiltinParam":{"QueryNameRange":{"ConstList":[{"StrConst":"Mike"},{"StrConst":"Jack"},{"StrConst":"Andrew"},{"StrConst":"John"}]},"AgeCalculated":{"MathExpr":{"OpMath":"+","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":10}}}}}}},{"FeatureExpr":{"FeaturePath":"user_history.username"}},{"FeatureExpr":{"FeaturePath":"user_history.username","BuiltinParam":{"QueryNameRange":{"ConstList":[{"StrConst":"Mike"},{"StrConst":"Jack"},{"StrConst":"Andrew"},{"StrConst":"John"}]},"AgeCalculated":{"MathExpr":{"OpMath":"+","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":10}}}}}}}]}}]}`
 	for i := 0; i < b.N; i++ {
-		_, _ = parser.ParseArishemCondition(cdtExpr, nil)
+		_, _ = parser.ParseArishemCondition(cdtExpr)
 	}
 }
 

@@ -18,6 +18,7 @@ package arishem
 
 import (
 	"github.com/bytedance/arishem/internal/operator"
+	"github.com/bytedance/arishem/internal/parser"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -51,4 +52,19 @@ func TestBuildCondition(t *testing.T) {
 	pass, err := JudgeConditionWithFactMeta(expr, `{"user":{"user_list":[{"name":"Aatrox"},{"name":"Ahri"},{"name":"Ezreal"},{"name":"MalPhite"}]}}`)
 	assert.Nil(t, err)
 	assert.False(t, pass)
+}
+
+func TestBuildAction(t *testing.T) {
+	aimStr, err := NewParamListAction("MyAction", []*Expr{NewConstExpr(NewNumConst(1.23))}).Build()
+	assert.Nil(t, err)
+	t.Log(aimStr)
+	aim, err := parser.ParseArishemAim(aimStr)
+	assert.Nil(t, err)
+	assert.NotNil(t, aim)
+	aimStr, err = NewParamMapAction("MyAction", map[string]*Expr{"rate": NewConstExpr(NewNumConst(1.23))}).Build()
+	assert.Nil(t, err)
+	t.Log(aimStr)
+	aim, err = parser.ParseArishemAim(aimStr)
+	assert.Nil(t, err)
+	assert.NotNil(t, aim)
 }

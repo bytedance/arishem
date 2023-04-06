@@ -211,7 +211,7 @@ func TestParseArishemConditionContext(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Log(testCase.name)
-		testCase.check(ParseArishemCondition(testCase.args, nil))
+		testCase.check(ParseArishemCondition(testCase.args))
 	}
 }
 
@@ -338,6 +338,6 @@ func TestParseArishemAimContext(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Log(testCase.name)
-		testCase.check(ParseArishemAim(testCase.args, nil))
+		testCase.check(ParseArishemAim(testCase.args))
 	}
 }
