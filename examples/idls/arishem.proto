@@ -1,0 +1,60 @@
+message Const {
+  optional bool BoolConst = 1;
+  optional double NumConst = 2;
+  optional string StrConst = 3;
+}
+
+message MathExpr {
+  required string OpMath = 1;
+  optional Expr Lhs = 2;
+  optional Expr Rhs = 3;
+  repeated Expr ParamList = 4;
+}
+
+message FuncExpr {
+  required string FuncName = 1;
+  map<string,Expr> ParamMap = 2;
+  repeated Expr ParamList = 3;
+}
+
+message FeatureExpr {
+  required string FeaturePath = 1;
+  map<string,Expr> BuiltinParam = 2;
+}
+
+message Expr {
+  repeated Expr ListExpr = 1;
+  map<string,Expr> MapExpr = 2;
+  optional Const Const = 3;
+  repeated Const ConstList = 4;
+  optional MathExpr MathExpr = 5;
+  optional FuncExpr FuncExpr = 6;
+  optional string VarExpr = 7;
+  optional FeatureExpr FeatureExpr = 8;
+}
+
+message ActionAim {
+  required string ActionName = 1;
+  map<string,Expr> ParamMap = 2;
+  repeated Expr ParamList = 3;
+}
+
+message Condition {
+  required string Operator = 1;
+  required Expr Lhs = 2;
+  required Expr Rhs = 3;
+}
+
+message ConditionGroup {
+  required string OpLogic = 1;
+  repeated ConditionGroup ConditionGroups = 2;
+  repeated Condition Conditions = 3;
+}
+
+message RuleExample {
+  required string Name = 1;
+  required ConditionGroup ConditionExpr = 2;
+  optional ActionAim ActionAim = 3;
+  repeated ActionAim ActionListAim = 4;
+  optional Expr ExprAim = 5;
+}
