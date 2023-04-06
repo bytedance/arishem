@@ -155,7 +155,7 @@ func TestFeatPreParser(t *testing.T) {
 		{
 			"AIM: action aim param map with single no param feature",
 			exprTypeAim,
-			`{"ActionName":"Greeting","BuiltinParam":{"UserName":{"FeatureExpr":{"FeaturePath":"user_profile.username"}}}}`,
+			`{"ActionName":"Greeting","ParamMap":{"UserName":{"FeatureExpr":{"FeaturePath":"user_profile.username"}}}}`,
 			func(featParams []typedef.FeatureParam) {
 				assert.Len(t, featParams, 1)
 				for _, param := range featParams {
@@ -209,18 +209,12 @@ func TestFeatPreParser(t *testing.T) {
 		fppl := NewFeaturePreParseListener()
 		if tc.et == exprTypeCondition {
 			_, err := parser.ParseArishemCondition(tc.args, fppl)
-			if err != nil {
-				t.Log(err.Error())
-			} else {
-				tc.check(fppl.Data())
-			}
+			assert.Nil(t, err)
+			tc.check(fppl.Data())
 		} else if tc.et == exprTypeAim {
 			_, err := parser.ParseArishemAim(tc.args, fppl)
-			if err != nil {
-				t.Log(err.Error())
-			} else {
-				tc.check(fppl.Data())
-			}
+			assert.Nil(t, err)
+			tc.check(fppl.Data())
 		}
 	}
 }

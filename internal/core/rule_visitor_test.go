@@ -267,7 +267,7 @@ func TestAimVisit(t *testing.T) {
 		{
 			"AIM: action aim param map with single no param feature",
 			`{"user":{"name":"tadokoro kouji","age":24}}`,
-			`{"ActionName":"Greeting","BuiltinParam":{"UserName":{"FeatureExpr":{"FeaturePath":"user_profile.username"}},"UserAge":{"VarExpr":"user.age"},"TempUsername":{"VarExpr":"user.name"},"UserBirthDay":{"FuncExpr":{"FuncName":"ListJoin","BuiltinParam":{"sep":{"Const":{"StrConst":""}},"list":{"ConstList":[{"NumConst":19},{"NumConst":19},{"NumConst":8},{"NumConst":10},{"NumConst":1},{"NumConst":14},{"NumConst":5},{"NumConst":14}]}}}}}}`,
+			`{"ActionName":"Greeting","ParamMap":{"UserName":{"FeatureExpr":{"FeaturePath":"user_profile.username"}},"UserAge":{"VarExpr":"user.age"},"TempUsername":{"VarExpr":"user.name"},"UserBirthDay":{"FuncExpr":{"FuncName":"ListJoin","ParamMap":{"sep":{"Const":{"StrConst":""}},"list":{"ConstList":[{"NumConst":19},{"NumConst":19},{"NumConst":8},{"NumConst":10},{"NumConst":1},{"NumConst":14},{"NumConst":5},{"NumConst":14}]}}}}}}`,
 			func(aim typedef.Aim, errMsg []string) {
 				assert.Empty(t, errMsg)
 				assert.NotNil(t, aim)
@@ -292,7 +292,7 @@ func TestAimVisit(t *testing.T) {
 			`[
     {
         "ActionName": "Greeting",
-        "BuiltinParam": {
+        "ParamMap": {
             "UserAge": {
                 "VarExpr": "user.age"
             },
@@ -303,7 +303,7 @@ func TestAimVisit(t *testing.T) {
     },
     {
         "ActionName": "Greeting1",
-        "BuiltinParam": {
+        "ParamMap": {
             "UserAge": {
                 "VarExpr": "user.age"
             },
@@ -314,7 +314,7 @@ func TestAimVisit(t *testing.T) {
     },
     {
         "ActionName": "Greeting2",
-        "BuiltinParam": {
+        "ParamMap": {
             "UserAge": {
                 "VarExpr": "user.age"
             },
@@ -363,20 +363,17 @@ func TestAimVisit(t *testing.T) {
 	for _, tc := range testCases {
 		t.Log(tc.name)
 		cdtCtx, err := parser.ParseArishemAim(tc.expr, nil)
+		assert.Nil(t, err)
+		dc, err := NewArishemDataCtx(tc.fact, nil)
 		if err != nil {
-			t.Log(err.Error())
+			t.Log(err)
 		} else {
-			dc, err := NewArishemDataCtx(tc.fact, nil)
-			if err != nil {
-				t.Log(err)
-			} else {
-				arisVst := NewArishemRuleVisitor()
-				tavo := &testArisVisitObserver{hash: tc.name}
-				arisVst.AddVisitObserver(tavo)
+			arisVst := NewArishemRuleVisitor()
+			tavo := &testArisVisitObserver{hash: tc.name}
+			arisVst.AddVisitObserver(tavo)
 
-				aim := arisVst.VisitAim(cdtCtx, dc, newArisVisitTarget(tc.name))
-				tc.check(aim, tavo.errMsgs)
-			}
+			aim := arisVst.VisitAim(cdtCtx, dc, newArisVisitTarget(tc.name))
+			tc.check(aim, tavo.errMsgs)
 		}
 	}
 }
