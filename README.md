@@ -204,6 +204,10 @@ func main() {
     }
 }
 ```
+输出结果
+```go
+rule passed!
+```
 
 或者通过内置的builder函数来构建条件表达式和目的表达式
 ```go
@@ -242,7 +246,7 @@ arishem将实时获取的网络数据定义为一个feature(特征)。arishem在
 ```json
 {
   ...
-  "Rhs": {
+  "FeatureExpr": {
     // user is the feature name, and username is the field path
     "FeaturePath": "user.username"
   }
