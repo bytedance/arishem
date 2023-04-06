@@ -156,7 +156,7 @@ arishem解析后
 arishem解析后
 
 ```go
-18
+20
 ```
 
 ## 4. FeatureExpr
@@ -170,8 +170,8 @@ arishem将依赖外部网络的数据定义为feature，使用FeatureExpr表示�
 ```json
 {
   "FeatureExpr": {
-    "FeaturePath": "user.age"
     // user is the feature name, age is the field path of user feature's data.
+    "FeaturePath": "user.age"
   }
 }
 ```
@@ -182,7 +182,6 @@ FeatureExpr支持内置参数(BuiltinParam)，内置参数表示的是Feature配
 {
   "FeatureExpr": {
     "FeaturePath": "user.age",
-    // user is the feature name, age is the field path of user feature's data.
     "BuiltinParam": {
       "QueryIDRange": {
         "ConstList": [
@@ -252,6 +251,7 @@ MathExpr支持表达式列表作为参数输入，其关键字为"ParamList"，�
   }
 }
 ```
+arishem在执行时，将会执行6+5+10的操作。
 
 ## 6. FuncExpr
 
@@ -261,8 +261,10 @@ MathExpr支持表达式列表作为参数输入，其关键字为"ParamList"，�
 - 无参
 
 ```json
-"FuncExpr": {
-"FuncName": "GetCurrentYear" // 获取当前年份
+{
+  "FuncExpr": {
+    "FuncName": "GetCurrentYear" // 获取当前年份
+  }
 }
 ```
 
