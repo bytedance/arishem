@@ -281,13 +281,15 @@ arishem支持多个配置的自定义，包括规则运算时的缓存实现、�
 在规则运算的场景下，我们小组面临最多的问题便是排查规则为什么通过/没通过？规则运算过程是否有错误？feature获取的时候具体过程是怎么样的，究竟是哪个数据没有获取到？
 所以感知规则运算的具体过程是非常有必要的，这将为后续排查规则命中详情提供基础能力的支持。
 
-arishem支持规则匹配过的的条件回调和错误回调，并且FeatureFeatcher也必须实现obserable方法，以让arishem内部将fetch的过程通知给每一个观察者。
+arishem支持规则匹配过的条件回调和错误回调，并且FeatureFetcher也必须实现observable方法，以便让arishem内部将feature fetch的过程通知给每一个已注册观察者。
 
 ```go
 // MyObserver implements VisitObserver and FeatureFetchObserver
 type MyObserver {}
 
-//...
+func (m *MyObserver) OnFeatureFetchStart(feat typedef.FeatureParam) {}
+
+func (m *MyObserver) OnFeatureFetchEnd(featureHash string, featureValue typedef.MetaType, err error) {}
 
 func main() {
     arishem.ExecuteSingleRule(rule, dataCtx, WithVisitObserver(myObserver), WithFetchObserver(myObserver))

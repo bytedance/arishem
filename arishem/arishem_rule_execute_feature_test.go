@@ -320,7 +320,7 @@ func NewMyObserver(name string) *MyObserver {
 	return &MyObserver{name: name, lock: &sync.RWMutex{}, timeMap: make(map[string]time.Time)}
 }
 
-func (m *MyObserver) OnFeaturesFetchStart(feat typedef.FeatureParam) {
+func (m *MyObserver) OnFeatureFetchStart(feat typedef.FeatureParam) {
 	now := time.Now()
 	fmt.Printf("%v feature=>%s start fetch, paramHash=>%s\n", now, feat.HashCode(), core.GenBuiltinParamHash(feat.BuiltinParam()))
 	m.lock.Lock()
@@ -328,7 +328,7 @@ func (m *MyObserver) OnFeaturesFetchStart(feat typedef.FeatureParam) {
 	m.timeMap[feat.HashCode()] = now
 }
 
-func (m *MyObserver) OnFeaturesFetchEnd(featureHash string, featureValue typedef.MetaType, err error) {
+func (m *MyObserver) OnFeatureFetchEnd(featureHash string, featureValue typedef.MetaType, err error) {
 	now := time.Now()
 	fmt.Printf("%v feature=>%s end fetch\n", now, featureHash)
 

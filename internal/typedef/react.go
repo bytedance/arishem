@@ -46,8 +46,8 @@ type ObservableVisitor interface {
 type FeatureFetchObserver interface {
 	Hashable
 
-	OnFeaturesFetchStart(feat FeatureParam)
-	OnFeaturesFetchEnd(featureHash string, featureValue MetaType, err error)
+	OnFeatureFetchStart(feat FeatureParam)
+	OnFeatureFetchEnd(featureHash string, featureValue MetaType, err error)
 }
 
 // ObservableFeatureFetcher supports feature fetch events callback behaviour.

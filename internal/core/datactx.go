@@ -119,13 +119,13 @@ func (a *arishemDataCtx) PrefetchFeatures(feats []typedef.FeatureParam) {
 			defer fwl.latch.Done()
 
 			for _, obs := range a.featureFetcher.GetFetchObservers() {
-				obs.OnFeaturesFetchStart(fwl.feat)
+				obs.OnFeatureFetchStart(fwl.feat)
 			}
 			meta, err := a.featureFetcher.FetchFeature(fwl.feat, a)
 			// store it into feature map
 			meta = a.storeFeatureMeta(fwl.feat, meta)
 			for _, obs := range a.featureFetcher.GetFetchObservers() {
-				obs.OnFeaturesFetchEnd(fwl.feat.HashCode(), meta, err)
+				obs.OnFeatureFetchEnd(fwl.feat.HashCode(), meta, err)
 			}
 		}, &featWithLatch{feat: feat, latch: wg})
 	}
@@ -168,7 +168,7 @@ func (a *arishemDataCtx) GetFeatureValue(featParam typedef.FeatureParam, fieldPa
 
 	// call back
 	for _, obs := range a.featureFetcher.GetFetchObservers() {
-		obs.OnFeaturesFetchStart(featParam)
+		obs.OnFeatureFetchStart(featParam)
 	}
 
 	// fetch here
@@ -176,7 +176,7 @@ func (a *arishemDataCtx) GetFeatureValue(featParam typedef.FeatureParam, fieldPa
 	feature, err = a.featureFetcher.FetchFeature(featParam, a)
 
 	for _, obs := range a.featureFetcher.GetFetchObservers() {
-		obs.OnFeaturesFetchEnd(featParam.HashCode(), feature, err)
+		obs.OnFeatureFetchEnd(featParam.HashCode(), feature, err)
 	}
 
 	// store the data
