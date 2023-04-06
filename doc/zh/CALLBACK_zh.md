@@ -6,17 +6,17 @@ arishem支持多个配置的自定义，包括规则运算时的缓存实现、�
 
 ```go
 func DefaultConfiguration() *core.Configuration {
-	c := new(core.Configuration)
-	core.ApplyOptions(c,
-		WithDefTreeCache(),
-		WithDefMaxParallels(),
-		WithDefGranularity(),
-		WithDefRuleComputePool(),
-		WithDefFeatureFetchPool(),
-		WithDefFeatFetcherFactory(),
-		WithDefFeatVisitCache(),
-	)
-	return c
+    c := new(core.Configuration)
+    core.ApplyOptions(c,
+        WithDefTreeCache(),
+        WithDefMaxParallels(),
+        WithDefGranularity(),
+        WithDefRuleComputePool(),
+        WithDefFeatureFetchPool(),
+        WithDefFeatFetcherFactory(),
+        WithDefFeatVisitCache(),
+    )
+    return c
 }
 ```
 
@@ -35,23 +35,23 @@ Granularity是arishem在运算多条规则时的分批算法，入参是当前�
 ```go
 
 func granularity(ruleGroupSize int, model core.ExecuteModel) int {
-	if model == core.ExecuteModelNoPriority {
-		if ruleGroupSize <= arishemConfiguration.MaxParallel {
-			return ruleGroupSize
-		}
-		return arishemConfiguration.MaxParallel
-	}
-  // dCpu is the double of cpu core num.
-	if ruleGroupSize < dCpu {
-		return ruleGroupSize
-	}
-	if ruleGroupSize < dCpu*2 {
-		return ruleGroupSize / 2
-	}
-	if dCpu <= 1 { // when x = 1，2*√x intersects with 2*x
-		return 1
-	}
-	return (dCpu*2 - factor) * 2
+    if model == core.ExecuteModelNoPriority {
+        if ruleGroupSize <= arishemConfiguration.MaxParallel {
+            return ruleGroupSize
+        }
+        return arishemConfiguration.MaxParallel
+    }
+    // dCpu is the double of cpu core num.
+    if ruleGroupSize < dCpu {
+        return ruleGroupSize
+    }
+    if ruleGroupSize < dCpu*2 {
+        return ruleGroupSize / 2
+    }
+    if dCpu <= 1 { // when x = 1，2*√x intersects with 2*x
+        return 1
+    }
+    return (dCpu*2 - factor) * 2
 }
 ```
 
@@ -74,19 +74,19 @@ arishem一共定义了两种回调类型，分别是规则运算回调和Feature
 ```go
 // VisitObserver is the observer that can listen to rule visit events.
 type VisitObserver interface {
-	Hashable
+    Hashable
 
-	// OnJudgeNodeVisitEnd passes the condition node
-	OnJudgeNodeVisitEnd(info JudgeNode, vt VisitTarget)
-	OnVisitError(node, errMsg string, vt VisitTarget)
+    // OnJudgeNodeVisitEnd passes the condition node
+    OnJudgeNodeVisitEnd(info JudgeNode, vt VisitTarget)
+    OnVisitError(node, errMsg string, vt VisitTarget)
 }
 
 // FeatureFetchObserver can listen to feature fetch events.
 type FeatureFetchObserver interface {
-	Hashable
+    Hashable
 
-	OnFeaturesFetchStart(feat FeatureParam)
-	OnFeaturesFetchEnd(featureHash string, featureValue MetaType, err error)
+    OnFeatureFetchStart(feat FeatureParam)
+    OnFeatureFetchEnd(featureHash string, featureValue MetaType, err error)
 }
 ```
 
@@ -106,21 +106,21 @@ ExecuteRules(rules, dc, WithVisitObserver(observer))
 
 ```go
 func (m *MyFeatureFetcher) AddFetchObserver(v ...typedef.FeatureFetchObserver) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	for _, observer := range v {
-		m.observers[observer.HashCode()] = observer
-	}
+    m.lock.Lock()
+    defer m.lock.Unlock()
+    for _, observer := range v {
+        m.observers[observer.HashCode()] = observer
+    }
 }
 
 func (m *MyFeatureFetcher) GetFetchObservers() []typedef.FeatureFetchObserver {
-	m.lock.RLock()
-	defer m.lock.RUnlock()
-	var obs []typedef.FeatureFetchObserver
-	for _, observer := range m.observers {
-		obs = append(obs, observer)
-	}
-	return obs
+    m.lock.RLock()
+    defer m.lock.RUnlock()
+    var obs []typedef.FeatureFetchObserver
+    for _, observer := range m.observers {
+        obs = append(obs, observer)
+    }
+    return obs
 }
 ```
 

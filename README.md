@@ -291,6 +291,10 @@ func (m *MyObserver) OnFeatureFetchStart(feat typedef.FeatureParam) {}
 
 func (m *MyObserver) OnFeatureFetchEnd(featureHash string, featureValue typedef.MetaType, err error) {}
 
+func (m *MyObserver) OnJudgeNodeVisitEnd(info typedef.JudgeNode, vt typedef.VisitTarget) {}
+
+func (m *MyObserver) OnVisitError(node, errMsg string, vt typedef.VisitTarget) {}
+
 func main() {
     arishem.ExecuteSingleRule(rule, dataCtx, WithVisitObserver(myObserver), WithFetchObserver(myObserver))
 }
