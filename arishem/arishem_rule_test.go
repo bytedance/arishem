@@ -38,7 +38,7 @@ func TestNewNoPriorityRule(t *testing.T) {
 	assert.NotNil(t, rule)
 	assert.NotNil(t, rule.ConditionPTree())
 	assert.NotNil(t, rule.AimPTree())
-	assert.NotEmpty(t, rule.CdtFeatParams())
+	assert.NotEmpty(t, rule.CondFeatParams())
 	assert.NotEmpty(t, rule.AimFeatParams())
 }
 

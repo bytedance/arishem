@@ -71,7 +71,7 @@ func (a *arishemRuleVisitor) ClearVisitObservers() {
 
 // VisitCondition visit condition entity to determinate condition is passed
 func (a *arishemRuleVisitor) VisitCondition(cdtCtx antlr.ParseTree, dCtx typedef.DataCtx, vt typedef.VisitTarget) (pass bool) {
-	const node = "VisitCdtEntity"
+	const node = "VisitCondition"
 	flag := false
 	switch cdtCtx.(type) {
 	case parser.ICondEntityContext, parser.IConditionGroupContext:
@@ -91,7 +91,7 @@ func (a *arishemRuleVisitor) VisitCondition(cdtCtx antlr.ParseTree, dCtx typedef
 }
 
 func (a *arishemRuleVisitor) VisitAim(aimCtx antlr.ParseTree, dCtx typedef.DataCtx, vt typedef.VisitTarget) (aim typedef.Aim) {
-	const node = "VisitAimEntity"
+	const node = "VisitAim"
 	flag := false
 	switch aimCtx.(type) {
 	case parser.IAimEntityContext, parser.IAimContext:

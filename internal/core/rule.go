@@ -28,7 +28,7 @@ type RuleTarget interface {
 	ConditionPTree() antlr.ParseTree
 	AimPTree() antlr.ParseTree
 
-	CdtFeatParams() []typedef.FeatureParam
+	CondFeatParams() []typedef.FeatureParam
 	AimFeatParams() []typedef.FeatureParam
 }
 

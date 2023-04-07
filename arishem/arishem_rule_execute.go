@@ -29,7 +29,7 @@ func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...core.Ex
 	if rule == nil || dc == nil {
 		return
 	}
-	cdtFeats := rule.CdtFeatParams()
+	cdtFeats := rule.CondFeatParams()
 	if len(cdtFeats) > 0 {
 		dc.PrefetchFeatures(cdtFeats)
 	}
@@ -171,14 +171,14 @@ func groupedConditionPreFetchFeatures(currIdx int, batchedRules [][]core.RuleTar
 	}
 	set := tools.NewHashSet()
 	for _, rule := range batchedRules[currIdx] {
-		for _, param := range rule.CdtFeatParams() {
+		for _, param := range rule.CondFeatParams() {
 			set.Add(param.(typedef.Hashable))
 		}
 	}
 	// if prefetching is configured, the next batch of features will be requested in advance when the rule is executed
 	if arishemConfiguration.Prefetch && currIdx < len(batchedRules)-1 {
 		for _, rule := range batchedRules[currIdx+1] {
-			for _, param := range rule.CdtFeatParams() {
+			for _, param := range rule.CondFeatParams() {
 				set.Add(param.(typedef.Hashable))
 			}
 		}

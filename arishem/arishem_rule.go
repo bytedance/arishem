@@ -53,11 +53,11 @@ func (r *ruleResult) Aim() typedef.Aim {
 }
 
 type NoPriorityRule struct {
-	name   string
-	cond   parser.ICondEntityContext
-	aim    parser.IAimEntityContext
-	cdtFps []typedef.FeatureParam
-	aimFps []typedef.FeatureParam
+	name    string
+	cond    parser.ICondEntityContext
+	aim     parser.IAimEntityContext
+	condFps []typedef.FeatureParam
+	aimFps  []typedef.FeatureParam
 }
 
 type PriorityRule struct {
@@ -93,11 +93,11 @@ func NewNoPriorityRule(name string, cdtExpr, aimExpr string) (npr core.RuleTarge
 		return
 	}
 	npr = &NoPriorityRule{
-		name:   name,
-		cond:   cdtTree.Tree.(parser.ICondEntityContext),
-		cdtFps: cdtTree.FeatParams,
-		aim:    aimTree.Tree.(parser.IAimEntityContext),
-		aimFps: aimTree.FeatParams,
+		name:    name,
+		cond:    cdtTree.Tree.(parser.ICondEntityContext),
+		condFps: cdtTree.FeatParams,
+		aim:     aimTree.Tree.(parser.IAimEntityContext),
+		aimFps:  aimTree.FeatParams,
 	}
 	return
 }
@@ -118,8 +118,8 @@ func (n *NoPriorityRule) AimPTree() antlr.ParseTree {
 	return n.aim
 }
 
-func (n *NoPriorityRule) CdtFeatParams() []typedef.FeatureParam {
-	return n.cdtFps
+func (n *NoPriorityRule) CondFeatParams() []typedef.FeatureParam {
+	return n.condFps
 }
 
 func (n *NoPriorityRule) AimFeatParams() []typedef.FeatureParam {
