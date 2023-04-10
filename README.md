@@ -304,3 +304,7 @@ func main() {
 ## 开源许可
 
 Arishem 基于[Apache License 2.0](LICENSE) 许可证。
+
+## 联系&&问题反馈
+
+Currently, we only support bug reports, summit your [ISSUES](https://github.com/bytedance/arishem/issues) here.
