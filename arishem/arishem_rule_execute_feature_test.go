@@ -19,7 +19,7 @@ package arishem
 import (
 	"fmt"
 	"github.com/bytedance/arishem/internal/core"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/gopkg/util/logger"
 	"github.com/stretchr/testify/assert"
 	"sync"

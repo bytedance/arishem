@@ -19,7 +19,7 @@ package parser
 import (
 	"errors"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/gopkg/util/xxhash3"
 	"strings"
 )

@@ -21,8 +21,8 @@ import (
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/internal/parser"
-	"github.com/bytedance/arishem/internal/tools"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/tools"
+	"github.com/bytedance/arishem/typedef"
 	"strings"
 	"sync"
 )

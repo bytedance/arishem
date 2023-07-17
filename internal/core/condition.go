@@ -16,7 +16,9 @@
 
 package core
 
-import "github.com/bytedance/arishem/internal/typedef"
+import (
+	"github.com/bytedance/arishem/typedef"
+)
 
 type arishemCondition struct {
 	passed    bool

@@ -18,7 +18,7 @@ package core
 
 import (
 	"github.com/bytedance/arishem/internal/parser"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/gopkg/util/logger"
 	"github.com/stretchr/testify/assert"
 	"testing"

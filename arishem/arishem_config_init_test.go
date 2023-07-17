@@ -16,7 +16,9 @@
 
 package arishem
 
-import "github.com/bytedance/arishem/internal/typedef"
+import (
+	"github.com/bytedance/arishem/typedef"
+)
 
 func init() {
 	Initialize(DefaultConfiguration(), WithFeatureFetcherFactory(func() typedef.FeatureFetcher {
