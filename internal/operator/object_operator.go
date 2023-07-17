@@ -16,7 +16,9 @@
 
 package operator
 
-import "github.com/bytedance/arishem/internal/tools"
+import (
+	"github.com/bytedance/arishem/tools"
+)
 
 // object operator
 

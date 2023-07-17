@@ -18,7 +18,7 @@ package arishem
 
 import (
 	"github.com/bytedance/arishem/internal/core"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/typedef"
 )
 
 func WithFeatureFetcherFactory(factory func() typedef.FeatureFetcher) core.Option {

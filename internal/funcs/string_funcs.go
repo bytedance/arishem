@@ -17,7 +17,7 @@
 package funcs
 
 import (
-	"github.com/bytedance/arishem/internal/tools"
+	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/sonic"
 	"github.com/bytedance/sonic/encoder"
 )

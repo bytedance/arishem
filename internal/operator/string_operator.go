@@ -18,7 +18,7 @@ package operator
 
 import (
 	"fmt"
-	"github.com/bytedance/arishem/internal/tools"
+	"github.com/bytedance/arishem/tools"
 	"regexp"
 	"strings"
 )

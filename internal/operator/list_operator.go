@@ -18,7 +18,7 @@ package operator
 
 import (
 	"errors"
-	"github.com/bytedance/arishem/internal/tools"
+	"github.com/bytedance/arishem/tools"
 	"strings"
 )
 

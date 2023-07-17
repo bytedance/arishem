@@ -19,7 +19,7 @@ package core
 import (
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/pool"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/typedef"
 )
 
 // Option used to config arishem engine

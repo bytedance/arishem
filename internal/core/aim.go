@@ -16,7 +16,9 @@
 
 package core
 
-import "github.com/bytedance/arishem/internal/typedef"
+import (
+	"github.com/bytedance/arishem/typedef"
+)
 
 type aimType int32
 type paramType int32
