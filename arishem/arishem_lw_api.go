@@ -19,8 +19,8 @@ package arishem
 import (
 	"errors"
 	"github.com/bytedance/arishem/internal/core"
-	"github.com/bytedance/arishem/internal/tools"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/tools"
+	"github.com/bytedance/arishem/typedef"
 	"strings"
 )
 

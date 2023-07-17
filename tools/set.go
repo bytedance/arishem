@@ -17,7 +17,7 @@
 package tools
 
 import (
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/typedef"
 	"sync"
 )
 

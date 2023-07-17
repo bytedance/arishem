@@ -19,7 +19,7 @@ package operator
 import (
 	"errors"
 	"fmt"
-	"github.com/bytedance/arishem/internal/tools"
+	"github.com/bytedance/arishem/tools"
 	"math/big"
 	"strings"
 )

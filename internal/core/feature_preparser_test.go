@@ -18,8 +18,8 @@ package core
 
 import (
 	"github.com/bytedance/arishem/internal/parser"
-	"github.com/bytedance/arishem/internal/tools"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/tools"
+	"github.com/bytedance/arishem/typedef"
 	"github.com/dgraph-io/ristretto"
 	"github.com/stretchr/testify/assert"
 	"testing"

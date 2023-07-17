@@ -17,8 +17,8 @@
 package core
 
 import (
-	"github.com/bytedance/arishem/internal/tools"
-	"github.com/bytedance/arishem/internal/typedef"
+	"github.com/bytedance/arishem/tools"
+	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/gopkg/util/xxhash3"
 	"github.com/bytedance/sonic"
 	"strconv"
