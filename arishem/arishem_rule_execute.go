@@ -29,6 +29,10 @@ func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...core.Ex
 	if rule == nil || dc == nil {
 		return
 	}
+	if len(opts) > 0 {
+		// consume data context option
+		core.ApplyExecuteOptions(nil, dc, opts...)
+	}
 	cdtFeats := rule.CondFeatParams()
 	if len(cdtFeats) > 0 {
 		dc.PrefetchFeatures(cdtFeats)
@@ -39,6 +43,10 @@ func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...core.Ex
 		aim:    nil,
 	}
 	rv := core.NewArishemRuleVisitor()
+	if len(opts) > 0 {
+		// consume visit context option
+		core.ApplyExecuteOptions(rv, nil, opts...)
+	}
 	r.passed = rv.VisitCondition(rule.ConditionPTree(), dc, rule)
 	if !r.passed {
 		rr = r
