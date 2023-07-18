@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytedance/arishem/internal/operator"
 	"github.com/bytedance/arishem/typedef"
@@ -49,7 +50,7 @@ func TestJudgeConditionWithFactMeta(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		tc.check(JudgeConditionWithFactMeta(tc.condition, tc.factMeat))
+		tc.check(JudgeConditionWithFactMeta(context.Background(), tc.condition, tc.factMeat))
 	}
 }
 
@@ -74,7 +75,7 @@ func case1() {
     ]
 }
 `
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	if err != nil {
 		// handle error here
 		// ...
@@ -104,8 +105,8 @@ func case2() {
     ]
 }
 `
-	pass, err := JudgeConditionWithFactMeta(condition, `
-{
+	pass, err := JudgeConditionWithFactMeta(context.Background(), condition,
+		`{
 	"user": {
 		"name": "KJ",
 		"age": 24
@@ -155,8 +156,8 @@ func case3() {
 		// handle error here
 		return
 	}
-	dc, err := DataContext(`
-{
+	dc, err := DataContext(context.Background(),
+		`{
 	"user": {
 		"name": "kouji",
 		"age": 24

@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -40,26 +41,26 @@ func TestFuncExprNoParam(t *testing.T) {
         }
     ]
 }`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
 
 func TestFuncExprParamList(t *testing.T) {
 	condition := `{"OpLogic":"&&","Conditions":[{"Operator":"LIST_CONTAINS","Lhs":{"FuncExpr":{"FuncName":"ListAdd","ParamList":[{"ConstList":[{"NumConst":1},{"NumConst":1}]},{"Const":{"NumConst":1}}]}},"Rhs":{"Const":{"NumConst":1}}}]}`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
 
 func TestFuncExprParamMap(t *testing.T) {
 	condition := `{"OpLogic":"&&","Conditions":[{"Operator":"LIST_CONTAINS","Lhs":{"FuncExpr":{"FuncName":"ListLength","ParamMap":{"list":{"ConstList":[{"NumConst":1},{"NumConst":1}]},"filter_null":{"Const":{"BoolConst":true}}}}},"Rhs":{"Const":{"NumConst":2}}}]}`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
 
-func TestCustomFunc(t *testing.T) {
+func TestCustomNoParamFunc(t *testing.T) {
 	condition := `{
     "OpLogic": "&&",
     "Conditions": [
@@ -78,7 +79,69 @@ func TestCustomFunc(t *testing.T) {
         }
     ]
 }`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
+	assert.Nil(t, err)
+	assert.True(t, pass)
+}
+
+func TestCustomMapParamFunc(t *testing.T) {
+	condition := `{
+    "OpLogic": "&&",
+    "Conditions": [
+        {
+            "Operator": "==",
+            "Lhs": {
+                "FuncExpr": {
+                    "FuncName": "MPHello",
+                    "ParamMap": {
+                        "name": {
+                            "Const": {
+                                "StrConst": "Arishem[MapParam]"
+                            }
+                        }
+                    }
+                }
+            },
+            "Rhs": {
+                "Const": {
+                    "StrConst": "Hello Arishem[MapParam]"
+                }
+            }
+        }
+    ]
+}`
+	pass, err := JudgeCondition(context.Background(), condition)
+	assert.Nil(t, err)
+	assert.True(t, pass)
+}
+
+func TestCustomListParamFunc(t *testing.T) {
+	condition := `{
+    "OpLogic": "&&",
+    "Conditions": [
+        {
+            "Operator": "==",
+            "Lhs": {
+                "FuncExpr": {
+                    "FuncName": "LPHello",
+                    "ParamList": [
+                        {
+                            "Const": {
+                                "StrConst": "Arishem[ListParam]"
+                            }
+                        }
+                    ]
+                }
+            },
+            "Rhs": {
+                "Const": {
+                    "StrConst": "Hello Arishem[ListParam]"
+                }
+            }
+        }
+    ]
+}`
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }

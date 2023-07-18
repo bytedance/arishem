@@ -17,15 +17,19 @@
 package funcs
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/sonic"
 	"math"
 )
 
-func MinFlatWithInt(params []interface{}) interface{} {
+var emptyParam = errors.New("params are empty")
+
+func MinFlatWithInt(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	var minSave int64 = math.MaxInt64
 	for i := range params {
@@ -47,12 +51,12 @@ func MinFlatWithInt(params []interface{}) interface{} {
 	if minSave == math.MaxInt64 {
 		minSave = 0
 	}
-	return minSave
+	return minSave, nil
 }
 
-func MinFlatWithFloat(params []interface{}) interface{} {
+func MinFlatWithFloat(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	var minSave float64 = math.MaxInt64
 	for i := range params {
@@ -74,12 +78,12 @@ func MinFlatWithFloat(params []interface{}) interface{} {
 	if minSave == math.MaxInt64 {
 		minSave = 0
 	}
-	return minSave
+	return minSave, nil
 }
 
-func MaxFlatWithInt(params []interface{}) interface{} {
+func MaxFlatWithInt(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	var maxSave int64 = math.MinInt64
 	for i := range params {
@@ -101,12 +105,12 @@ func MaxFlatWithInt(params []interface{}) interface{} {
 	if maxSave == math.MinInt64 {
 		maxSave = 0
 	}
-	return maxSave
+	return maxSave, nil
 }
 
-func MaxFlatWithFloat(params []interface{}) interface{} {
+func MaxFlatWithFloat(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	var maxSave float64 = math.MinInt64
 	for i := range params {
@@ -128,11 +132,11 @@ func MaxFlatWithFloat(params []interface{}) interface{} {
 	if maxSave == math.MinInt64 {
 		maxSave = 0
 	}
-	return maxSave
+	return maxSave, nil
 }
 
 //ListLength calculate the length of targetList
-func ListLength(params map[string]interface{}) interface{} {
+func ListLength(ctx context.Context, params map[string]interface{}) (interface{}, error) {
 	const (
 		keyList       = "list"
 		keyFilterNull = "filter_null"
@@ -140,14 +144,11 @@ func ListLength(params map[string]interface{}) interface{} {
 
 	listVar, ok := params[keyList]
 	if !ok {
-		return 0
+		return nil, errors.New("[ListLength] param: list not found")
 	}
 	list, err := tools.ConvToSliceUnifyType(listVar)
 	if err != nil {
-		return 0
-	}
-	if list == nil {
-		return 0
+		return nil, err
 	}
 	filterNull := false
 	filterNullStr, ok := params[keyFilterNull]
@@ -161,38 +162,41 @@ func ListLength(params map[string]interface{}) interface{} {
 		}
 		length++
 	}
-	return length
+	return length, nil
 }
 
 //ListFlatJoin flat params into one list, params[0] as the separator
-func ListFlatJoin(params []interface{}) interface{} {
+func ListFlatJoin(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 1 {
-		return nil
+		return nil, errors.New("ListFlatJoin param must contains at least one array")
 	}
 	// separator
-	flatList := ListAdd(params[1:])
-	return tools.JoinString(flatList, fmt.Sprint(params[0]))
+	flatList, err := ListAdd(ctx, params[1:])
+	if err != nil {
+		return nil, err
+	}
+	return tools.JoinString(flatList, fmt.Sprint(params[0])), nil
 }
 
-func ListJoin(params map[string]interface{}) interface{} {
+func ListJoin(ctx context.Context, params map[string]interface{}) (interface{}, error) {
 	const (
 		keyList      = "list"
 		keySeparator = "sep"
 	)
 	listI, ok := params[keyList]
 	if !ok {
-		return ""
+		return nil, errors.New("[ListJoin] param: list not found")
 	}
 	separator, ok := params[keySeparator]
 	if !ok {
-		return ""
+		return nil, errors.New("[ListJoin] param: sep not found")
 	}
-	return tools.JoinString(listI, fmt.Sprint(separator))
+	return tools.JoinString(listI, fmt.Sprint(separator)), nil
 }
 
-func ListAdd(params []interface{}) interface{} {
+func ListAdd(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	elements := make([]interface{}, 0, len(params)*4)
 	for _, param := range params {
@@ -204,24 +208,24 @@ func ListAdd(params []interface{}) interface{} {
 			elements = append(elements, ele)
 		}
 	}
-	return elements
+	return elements, nil
 }
 
-func ListRemove(params []interface{}) interface{} {
+func ListRemove(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	firstList, err := tools.ConvToSliceUnifyType(params[0])
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	recordMap := make(map[interface{}]bool)
 	for _, e := range firstList {
 		if e == nil {
 			continue
 		}
-		pv := propertyVal(e)
-		if pv == nil {
+		pv, err := propertyVal(e)
+		if err != nil || pv == nil {
 			continue
 		}
 		recordMap[pv] = true
@@ -239,8 +243,8 @@ func ListRemove(params []interface{}) interface{} {
 			if e == nil {
 				continue
 			}
-			pv := propertyVal(e)
-			if pv == nil {
+			pv, err := propertyVal(e)
+			if err != nil || pv == nil {
 				continue
 			}
 			recordMap[pv] = false
@@ -253,12 +257,12 @@ func ListRemove(params []interface{}) interface{} {
 		}
 		finalList = append(finalList, k)
 	}
-	return finalList
+	return finalList, nil
 }
 
-func ListUnion(params []interface{}) interface{} {
+func ListUnion(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	recordMap := make(map[interface{}]bool, len(params)*4)
 	for i := range params {
@@ -270,8 +274,8 @@ func ListUnion(params []interface{}) interface{} {
 			if ele == nil {
 				continue
 			}
-			pv := propertyVal(ele)
-			if pv == nil {
+			pv, err := propertyVal(ele)
+			if err != nil || pv == nil {
 				continue
 			}
 			recordMap[pv] = true
@@ -284,19 +288,19 @@ func ListUnion(params []interface{}) interface{} {
 		}
 		finalList = append(finalList, k)
 	}
-	return finalList
+	return finalList, nil
 }
 
-func ListIntersect(params []interface{}) interface{} {
+func ListIntersect(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	if len(params) == 1 {
 		list, err := tools.ConvToSliceUnifyType(params[0])
 		if err != nil {
-			return nil
+			return nil, err
 		}
-		return list
+		return list, nil
 	}
 	recordMap := make(map[interface{}]int, len(params)*4)
 	for i := range params {
@@ -308,8 +312,8 @@ func ListIntersect(params []interface{}) interface{} {
 			if ele == nil {
 				continue
 			}
-			pv := propertyVal(ele)
-			if pv == nil {
+			pv, err := propertyVal(ele)
+			if err != nil || pv == nil {
 				continue
 			}
 			if _, ok := recordMap[pv]; ok {
@@ -326,25 +330,25 @@ func ListIntersect(params []interface{}) interface{} {
 		}
 		finalList = append(finalList, k)
 	}
-	return finalList
+	return finalList, nil
 }
 
-func propertyVal(target interface{}) interface{} {
+func propertyVal(target interface{}) (interface{}, error) {
 	if target == nil {
-		return nil
+		return nil, emptyParam
 	}
 	if tools.IsNumber(target) {
 		num, err := tools.StringToNumber(fmt.Sprint(target))
 		if err != nil {
-			return nil
+			return nil, err
 		}
-		return num
+		return num, nil
 	} else if tools.IsString(target) {
-		return target
+		return target, nil
 	}
 	m, err := sonic.MarshalString(target)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return m
+	return m, nil
 }

@@ -17,6 +17,7 @@
 package core
 
 import (
+	"context"
 	"errors"
 	"github.com/bytedance/arishem/internal/pool"
 	"github.com/bytedance/arishem/tools"
@@ -52,6 +53,7 @@ type featMetaWithParam struct {
 }
 
 type arishemDataCtx struct {
+	ctx            context.Context // context for goroutine, usually for log print
 	factMeta       typedef.MetaType
 	visitCache     *sync.Map
 	featLatches    *tools.OnceMap
@@ -60,7 +62,7 @@ type arishemDataCtx struct {
 	featureFetcher typedef.FeatureFetcher
 }
 
-func NewArishemDataCtx(factJSON string, ff typedef.FeatureFetcher) (dc typedef.DataCtx, err error) {
+func NewArishemDataCtx(ctx context.Context, factJSON string, ff typedef.FeatureFetcher) (dc typedef.DataCtx, err error) {
 	if ff == nil {
 		err = errors.New("feature fetcher can not be nil")
 		return
@@ -76,6 +78,7 @@ func NewArishemDataCtx(factJSON string, ff typedef.FeatureFetcher) (dc typedef.D
 		}
 	}
 	dc = &arishemDataCtx{
+		ctx:            ctx,
 		factMeta:       fm,
 		visitCache:     &sync.Map{},
 		featLatches:    tools.NewOnceMap(),
@@ -84,6 +87,10 @@ func NewArishemDataCtx(factJSON string, ff typedef.FeatureFetcher) (dc typedef.D
 		featureFetcher: ff,
 	}
 	return
+}
+
+func (a *arishemDataCtx) Context() context.Context {
+	return a.ctx
 }
 
 func (a *arishemDataCtx) Get(key interface{}) (val interface{}, ok bool) {
@@ -119,13 +126,13 @@ func (a *arishemDataCtx) PrefetchFeatures(feats []typedef.FeatureParam) {
 			defer fwl.latch.Done()
 
 			for _, obs := range a.featureFetcher.GetFetchObservers() {
-				obs.OnFeatureFetchStart(fwl.feat)
+				obs.OnFeatureFetchStart(a.Context(), fwl.feat)
 			}
-			meta, err := a.featureFetcher.FetchFeature(fwl.feat, a)
+			meta, err := a.featureFetcher.FetchFeature(a.Context(), fwl.feat, a)
 			// store it into feature map
 			meta = a.storeFeatureMeta(fwl.feat, meta)
 			for _, obs := range a.featureFetcher.GetFetchObservers() {
-				obs.OnFeatureFetchEnd(fwl.feat.HashCode(), meta, err)
+				obs.OnFeatureFetchEnd(a.Context(), fwl.feat.HashCode(), meta, err)
 			}
 		}, &featWithLatch{feat: feat, latch: wg})
 	}
@@ -168,15 +175,15 @@ func (a *arishemDataCtx) GetFeatureValue(featParam typedef.FeatureParam, fieldPa
 
 	// call back
 	for _, obs := range a.featureFetcher.GetFetchObservers() {
-		obs.OnFeatureFetchStart(featParam)
+		obs.OnFeatureFetchStart(a.Context(), featParam)
 	}
 
 	// fetch here
 	var feature typedef.MetaType
-	feature, err = a.featureFetcher.FetchFeature(featParam, a)
+	feature, err = a.featureFetcher.FetchFeature(a.Context(), featParam, a)
 
 	for _, obs := range a.featureFetcher.GetFetchObservers() {
-		obs.OnFeatureFetchEnd(featParam.HashCode(), feature, err)
+		obs.OnFeatureFetchEnd(a.Context(), featParam.HashCode(), feature, err)
 	}
 
 	// store the data

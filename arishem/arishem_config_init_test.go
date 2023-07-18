@@ -17,6 +17,8 @@
 package arishem
 
 import (
+	"context"
+	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
 )
 
@@ -26,20 +28,20 @@ func init() {
 		WithFeatureFetcherFactory(func() typedef.FeatureFetcher {
 			return NewMyFeatureFetcher()
 		}),
-		WithCustomNoParamFuncs(NoParamFnPair{name: "NPHello", fn: MyCustomNoFuncHelloArishem}),
-		WithCustomMapParamFuncs(MapParamFnPair{name: "MPHello", fn: MyCustomMapFuncHelloArishem}),
-		WithCustomListParamFuncs(ListParamFnPair{name: "LPHello", fn: MyCustomListFuncHelloArishem}),
+		WithCustomNoParamFuncs(NoParamFnPair{Name: "NPHello", Fn: MyCustomNoFuncHelloArishem}),
+		WithCustomMapParamFuncs(MapParamFnPair{Name: "MPHello", Fn: MyCustomMapFuncHelloArishem}),
+		WithCustomListParamFuncs(ListParamFnPair{Name: "LPHello", Fn: MyCustomListFuncHelloArishem}),
 	)
 }
 
-func MyCustomNoFuncHelloArishem() interface{} {
-	return "Hello Arishem"
+func MyCustomNoFuncHelloArishem(ctx context.Context) (interface{}, error) {
+	return "Hello Arishem", nil
 }
 
-func MyCustomMapFuncHelloArishem(param map[string]interface{}) interface{} {
-	return "Hello Arishem"
+func MyCustomMapFuncHelloArishem(ctx context.Context, param map[string]interface{}) (interface{}, error) {
+	return "Hello " + tools.ConvToUnifiedStringType(param["name"]), nil
 }
 
-func MyCustomListFuncHelloArishem(param []interface{}) interface{} {
-	return "Hello Arishem"
+func MyCustomListFuncHelloArishem(ctx context.Context, param []interface{}) (interface{}, error) {
+	return "Hello " + tools.ConvToUnifiedStringType(param[0]), nil
 }

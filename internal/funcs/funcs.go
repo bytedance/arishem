@@ -17,13 +17,14 @@
 package funcs
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytedance/arishem/tools"
 )
 
-type NoParamFn func() interface{}
-type MapParamFn func(params map[string]interface{}) interface{}
-type ListParamFn func(params []interface{}) interface{}
+type NoParamFn func(ctx context.Context) (interface{}, error)
+type MapParamFn func(ctx context.Context, params map[string]interface{}) (interface{}, error)
+type ListParamFn func(ctx context.Context, params []interface{}) (interface{}, error)
 
 var (
 	MapParamFunc = map[string]MapParamFn{
@@ -62,15 +63,15 @@ var (
 	}
 )
 
-func InvokeFunc(funcname string, paramMap map[string]interface{}, paramList []interface{}) (interface{}, error) {
+func InvokeFunc(ctx context.Context, funcname string, paramMap map[string]interface{}, paramList []interface{}) (interface{}, error) {
 	if fn, ok := NoParamFunc[funcname]; ok {
-		return fn(), nil
+		return fn(ctx)
 	}
 	if fn, ok := MapParamFunc[funcname]; ok {
-		return fn(paramMap), nil
+		return fn(ctx, paramMap)
 	}
 	if fn, ok := ListParamFunc[funcname]; ok {
-		return fn(paramList), nil
+		return fn(ctx, paramList)
 	}
 	return nil, fmt.Errorf("no function named=>%s found", funcname)
 }

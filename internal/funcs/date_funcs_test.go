@@ -17,11 +17,13 @@
 package funcs
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDateToUnix(t *testing.T) {
+	ctx := context.Background()
 	// @case 1
 	params := map[string]interface{}{
 		"date":      "2023-01-02",
@@ -29,50 +31,51 @@ func TestDateToUnix(t *testing.T) {
 		"zone":      "local",
 		"unit":      "sec",
 	}
-	unix := DateToUnix(params)
+	unix, _ := DateToUnix(ctx, params)
 	t.Log(unix)
 	// @case 2
 	params["zone"] = "utc"
-	unix = DateToUnix(params)
+	unix, _ = DateToUnix(ctx, params)
 	t.Log(unix)
 	// @case 3
 	params["zone"] = "local"
-	unix = DateToUnix(params)
+	unix, _ = DateToUnix(ctx, params)
 	t.Log(unix)
 	// @case 4
 	params["unit"] = "milli"
-	unix = DateToUnix(params)
+	unix, _ = DateToUnix(ctx, params)
 	t.Log(unix)
 	// @case 5
 	params["unit"] = "micro"
-	unix = DateToUnix(params)
+	unix, _ = DateToUnix(ctx, params)
 	t.Log(unix)
 	// @case 6
 	params["unit"] = "nano"
-	unix = DateToUnix(params)
+	unix, _ = DateToUnix(ctx, params)
 	t.Log(unix)
 }
 
 func TestUnixToDate(t *testing.T) {
+	ctx := context.Background()
 	// @case 1
 	params := map[string]interface{}{
 		"date":   "1672655888",
 		"format": "2006-01-02",
 	}
-	unix := UnixToDate(params)
+	unix, _ := UnixToDate(ctx, params)
 	assert.Equal(t, "2023-01-02", unix)
 	// @case 2
 	params["format"] = "2006-01-02 15:04"
-	unix = UnixToDate(params)
+	unix, _ = UnixToDate(ctx, params)
 	assert.Equal(t, "2023-01-02 18:38", unix)
 	// @case 3
 	params["format"] = "2006-01-02 15:04:05"
-	unix = UnixToDate(params)
+	unix, _ = UnixToDate(ctx, params)
 	assert.Equal(t, "2023-01-02 18:38:08", unix)
 }
 
 func TestGetCurrentYear(t *testing.T) {
-	year := GetCurrentYear()
+	year, _ := GetCurrentYear(context.Background())
 	assert.Equal(t, int64(2023), year)
 }
 
@@ -107,6 +110,6 @@ func TestGetCurrentMinute(t *testing.T) {
 }*/
 
 func TestGetCurrentSecond(t *testing.T) {
-	second := GetCurrentSecond()
+	second, _ := GetCurrentSecond(context.Background())
 	t.Log(second)
 }

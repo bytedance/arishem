@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"github.com/bytedance/arishem/internal/core"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -101,7 +102,7 @@ func TestExecuteSingleRule(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Log(tc.name)
-		dc, err := core.NewArishemDataCtx(tc.factMeta, FeatureFetcherFactory())
+		dc, err := core.NewArishemDataCtx(context.Background(), tc.factMeta, FeatureFetcherFactory())
 		if err != nil {
 			t.Log(err)
 		} else {
@@ -348,7 +349,7 @@ func TestExecuteRules(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Log(tc.name)
-		dc, err := core.NewArishemDataCtx(tc.factMeta, FeatureFetcherFactory())
+		dc, err := core.NewArishemDataCtx(context.Background(), tc.factMeta, FeatureFetcherFactory())
 		if err != nil {
 			t.Log(err)
 		} else {

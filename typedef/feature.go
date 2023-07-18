@@ -16,6 +16,8 @@
 
 package typedef
 
+import "context"
+
 type MetaType map[string]interface{}
 
 // Feature holds the builtin parameters and metas fetched from user.
@@ -31,7 +33,7 @@ type FeatureFetcher interface {
 	ObservableFeatureFetcher
 
 	// FetchFeature fetch one feature, return data type is map[string]interface{}
-	FetchFeature(feat FeatureParam, dc DataCtx) (MetaType, error)
+	FetchFeature(ctx context.Context, feat FeatureParam, dc DataCtx) (MetaType, error)
 }
 
 // FeatureParam is the parameter pass to FeatureFetcher to fetch a feature, which uniquely identifies a feature snapshot in a DataCtx.

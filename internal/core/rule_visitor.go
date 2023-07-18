@@ -47,7 +47,7 @@ func NewArishemRuleVisitor() typedef.RuleVisitor {
 
 func (a *arishemRuleVisitor) errorCallback(node, errMsg string) {
 	for _, obsr := range a.observers {
-		obsr.OnVisitError(node, errMsg, a.visitTarget)
+		obsr.OnVisitError(a.dataCtx.Context(), node, errMsg, a.visitTarget)
 	}
 }
 
@@ -208,7 +208,7 @@ func (a *arishemRuleVisitor) VisitFullCondition(ctx *parser.FullConditionContext
 			cdtCc = cdtC
 		}
 		for _, obsr := range a.observers {
-			obsr.OnJudgeNodeVisitEnd(cdtCc, a.visitTarget)
+			obsr.OnJudgeNodeVisitEnd(a.dataCtx.Context(), cdtCc, a.visitTarget)
 		}
 		// remove debug log
 		//logger.Infof("cache hit in full condition!!! text=>%s", ctx.GetText())
@@ -229,7 +229,7 @@ func (a *arishemRuleVisitor) VisitFullCondition(ctx *parser.FullConditionContext
 	a.dataCtx.Set(ctx.GetAltNumber(), cdtInfo)
 	// observers call back
 	for _, obsr := range a.observers {
-		obsr.OnJudgeNodeVisitEnd(cdtInfo, a.visitTarget)
+		obsr.OnJudgeNodeVisitEnd(a.dataCtx.Context(), cdtInfo, a.visitTarget)
 	}
 	return pass
 }
@@ -425,10 +425,9 @@ func (a *arishemRuleVisitor) VisitParamMapFunc(ctx *parser.ParamMapFuncContext) 
 			paramMap = paramI.(map[string]interface{})
 		}
 	}
-	res, err := funcs.InvokeFunc(funcname, paramMap, nil)
+	res, err := funcs.InvokeFunc(a.dataCtx.Context(), funcname, paramMap, nil)
 	if err != nil {
 		a.errorCallback(node, err.Error())
-		return nil
 	}
 	return res
 }
@@ -437,7 +436,7 @@ func (a *arishemRuleVisitor) VisitParamListFunc(ctx *parser.ParamListFuncContext
 	const node = "VisitParamListFunc"
 	// get function name
 	funcname := ctx.FuncNamePair().NameKey().NAME_KEY_TYPE().GetText()
-	// param map
+	// param list
 	var paramList []interface{}
 	exprsCtx := ctx.Exprs()
 	if exprsCtx != nil {
@@ -446,10 +445,9 @@ func (a *arishemRuleVisitor) VisitParamListFunc(ctx *parser.ParamListFuncContext
 			paramList = paramI.([]interface{})
 		}
 	}
-	res, err := funcs.InvokeFunc(funcname, nil, paramList)
+	res, err := funcs.InvokeFunc(a.dataCtx.Context(), funcname, nil, paramList)
 	if err != nil {
 		a.errorCallback(node, err.Error())
-		return nil
 	}
 	return res
 }

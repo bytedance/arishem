@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"github.com/bytedance/arishem/internal/operator"
 	"github.com/bytedance/arishem/internal/parser"
 	"github.com/stretchr/testify/assert"
@@ -49,7 +50,7 @@ func TestBuildCondition(t *testing.T) {
 	assert.NotEmpty(t, expr)
 	assert.Equal(t, `{"OpLogic":"&&","Conditions":[{"Operator":"==","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"!LIST_IN","Lhs":{"VarExpr":"user.user_list#2.name"},"Rhs":{"ConstList":[{"StrConst":"Jack"},{"StrConst":"Jane"},{"StrConst":"John"},{"StrConst":"Ezreal"}]}}]}`, expr)
 
-	pass, err := JudgeConditionWithFactMeta(expr, `{"user":{"user_list":[{"name":"Aatrox"},{"name":"Ahri"},{"name":"Ezreal"},{"name":"MalPhite"}]}}`)
+	pass, err := JudgeConditionWithFactMeta(context.Background(), expr, `{"user":{"user_list":[{"name":"Aatrox"},{"name":"Ahri"},{"name":"Ezreal"},{"name":"MalPhite"}]}}`)
 	assert.Nil(t, err)
 	assert.False(t, pass)
 }
