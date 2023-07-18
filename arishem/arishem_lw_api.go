@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"errors"
 	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/tools"
@@ -33,8 +34,8 @@ type dummyVisitTarget struct{ name string }
 func (d *dummyVisitTarget) Identifier() string { return d.name }
 
 // DataContext will create a new DataContext by fact meta json.
-func DataContext(json string) (dc typedef.DataCtx, err error) {
-	dc, err = core.NewArishemDataCtx(json, arishemConfiguration.FeatFetcherFactory())
+func DataContext(ctx context.Context, json string) (dc typedef.DataCtx, err error) {
+	dc, err = core.NewArishemDataCtx(ctx, json, arishemConfiguration.FeatFetcherFactory())
 	return
 }
 
@@ -66,12 +67,12 @@ func ParseCondition(condition string) (tree *core.RuleTree, err error) {
 }
 
 // JudgeCondition will judge the condition string, pass will be set true if condition passed.
-func JudgeCondition(condition string, opts ...core.ExecuteOption) (pass bool, err error) {
-	return JudgeConditionWithFactMeta(condition, "{}", opts...)
+func JudgeCondition(ctx context.Context, condition string, opts ...core.ExecuteOption) (pass bool, err error) {
+	return JudgeConditionWithFactMeta(ctx, condition, "{}", opts...)
 }
 
 // JudgeConditionWithFactMeta will judge the condition string with fact meta, pass will be set true if condition passed.
-func JudgeConditionWithFactMeta(condition, factMeta string, opts ...core.ExecuteOption) (pass bool, err error) {
+func JudgeConditionWithFactMeta(ctx context.Context, condition, factMeta string, opts ...core.ExecuteOption) (pass bool, err error) {
 	tree, err := ParseCondition(condition)
 	if err != nil {
 		return
@@ -80,11 +81,11 @@ func JudgeConditionWithFactMeta(condition, factMeta string, opts ...core.Execute
 	factMeta = strings.TrimSpace(factMeta)
 	if factMeta == "" {
 		if emptyDataCtx == nil {
-			emptyDataCtx, _ = core.NewArishemDataCtx("{}", arishemConfiguration.FeatFetcherFactory())
+			emptyDataCtx, _ = core.NewArishemDataCtx(ctx, "{}", arishemConfiguration.FeatFetcherFactory())
 		}
 		dc = emptyDataCtx
 	} else {
-		dc, err = core.NewArishemDataCtx(factMeta, arishemConfiguration.FeatFetcherFactory())
+		dc, err = core.NewArishemDataCtx(ctx, factMeta, arishemConfiguration.FeatFetcherFactory())
 	}
 	if err != nil {
 		return

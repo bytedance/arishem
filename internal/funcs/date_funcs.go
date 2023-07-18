@@ -17,53 +17,55 @@
 package funcs
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/bytedance/arishem/tools"
 	"time"
 )
 
-func GetCurrentYear() interface{} {
-	return int64(time.Now().Year())
+func GetCurrentYear(ctx context.Context) (interface{}, error) {
+	return int64(time.Now().Year()), nil
 }
 
-func GetCurrentYearDay() interface{} {
-	return int64(time.Now().YearDay())
+func GetCurrentYearDay(ctx context.Context) (interface{}, error) {
+	return int64(time.Now().YearDay()), nil
 }
 
-func GetCurrentMonth() interface{} {
-	return int64(time.Now().Month())
+func GetCurrentMonth(ctx context.Context) (interface{}, error) {
+	return int64(time.Now().Month()), nil
 }
 
-func GetCurrentMonthDay() interface{} {
-	return int64(time.Now().Day())
+func GetCurrentMonthDay(ctx context.Context) (interface{}, error) {
+	return int64(time.Now().Day()), nil
 }
 
-func GetCurrentWeekDay() interface{} {
-	return time.Now().Weekday().String()
+func GetCurrentWeekDay(ctx context.Context) (interface{}, error) {
+	return time.Now().Weekday().String(), nil
 }
 
 // GetCurrentHour 获取当前的小时数
-func GetCurrentHour() interface{} {
-	return int64(time.Now().Hour())
+func GetCurrentHour(ctx context.Context) (interface{}, error) {
+	return int64(time.Now().Hour()), nil
 }
 
-func GetCurrentMinute() interface{} {
-	return int64(time.Now().Minute())
+func GetCurrentMinute(ctx context.Context) (interface{}, error) {
+	return int64(time.Now().Minute()), nil
 }
 
-func GetCurrentSecond() interface{} {
-	return int64(time.Now().Second())
+func GetCurrentSecond(ctx context.Context) (interface{}, error) {
+	return int64(time.Now().Second()), nil
 }
 
-func GetCurrentLocation() interface{} {
-	return time.Now().Location().String()
+func GetCurrentLocation(ctx context.Context) (interface{}, error) {
+	return time.Now().Location().String(), nil
 }
 
-func GetUnixSecond() interface{} {
-	return time.Now().Unix()
+func GetUnixSecond(ctx context.Context) (interface{}, error) {
+	return time.Now().Unix(), nil
 }
 
-func DateToUnix(params map[string]interface{}) interface{} {
+func DateToUnix(ctx context.Context, params map[string]interface{}) (interface{}, error) {
 	const (
 		keyDate      = "date"
 		keyPrecision = "precision"
@@ -89,7 +91,7 @@ func DateToUnix(params map[string]interface{}) interface{} {
 	)
 	dateStr, ok := params[keyDate]
 	if !ok {
-		return time.Now().Unix()
+		return nil, errors.New("[DateToUnix] param: date not found")
 	}
 	precision := "sec"
 	p, ok := params[keyPrecision]
@@ -129,38 +131,38 @@ func DateToUnix(params map[string]interface{}) interface{} {
 		var loc *time.Location
 		loc, err = time.LoadLocation(zone)
 		if err != nil {
-			return time.Now().Unix()
+			return nil, err
 		}
 		dateTime, err = time.ParseInLocation(timeFmt, fmt.Sprint(dateStr), loc)
 	}
 	if err != nil {
-		return time.Now().Unix()
+		return nil, err
 	}
 	if unit == unitSec {
-		return dateTime.Unix()
+		return dateTime.Unix(), nil
 	} else if unit == unitMilli {
-		return dateTime.UnixMilli()
+		return dateTime.UnixMilli(), nil
 	} else if unit == unitMicro {
-		return dateTime.UnixMicro()
+		return dateTime.UnixMicro(), nil
 	} else if unit == unitNano {
-		return dateTime.UnixNano()
+		return dateTime.UnixNano(), nil
 	} else {
-		return time.Now().Unix()
+		return time.Now().Unix(), nil
 	}
 }
 
-func UnixToDate(params map[string]interface{}) interface{} {
+func UnixToDate(ctx context.Context, params map[string]interface{}) (interface{}, error) {
 	const (
 		keyDate   = "date"
 		keyFormat = "format"
 	)
 	dateUnix, ok := params[keyDate]
 	if !ok {
-		return time.Now().Format(tools.ReadableTimeFmtSec)
+		return nil, errors.New("[UnixToDate] param: date not found")
 	}
 	unix, err := tools.ConvToInt64(dateUnix)
 	if err != nil {
-		return time.Now().Format(tools.ReadableTimeFmtSec)
+		return nil, err
 	}
 	dateTime := time.Unix(unix, 0)
 	format := tools.ReadableTimeFmtSec
@@ -168,5 +170,5 @@ func UnixToDate(params map[string]interface{}) interface{} {
 	if ok {
 		format = fmt.Sprint(f)
 	}
-	return dateTime.Format(format)
+	return dateTime.Format(format), nil
 }

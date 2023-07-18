@@ -17,6 +17,7 @@
 package core
 
 import (
+	"context"
 	"github.com/bytedance/arishem/internal/parser"
 	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/gopkg/util/logger"
@@ -33,7 +34,7 @@ func (t *testFeatureFetcher) GetFetchObservers() []typedef.FeatureFetchObserver 
 
 func (t *testFeatureFetcher) ClearFetchObservers() {}
 
-func (t *testFeatureFetcher) FetchFeature(feat typedef.FeatureParam, dc typedef.DataCtx) (typedef.MetaType, error) {
+func (t *testFeatureFetcher) FetchFeature(ctx context.Context, feat typedef.FeatureParam, dc typedef.DataCtx) (typedef.MetaType, error) {
 	//dc.GetFeatureValue(&testFeatureParam{})
 	return nil, nil
 }
@@ -59,13 +60,13 @@ func (t *testArisVisitObserver) HashCode() string {
 	return t.hash
 }
 
-func (t *testArisVisitObserver) OnJudgeNodeVisitEnd(info typedef.JudgeNode, vt typedef.VisitTarget) {
+func (t *testArisVisitObserver) OnJudgeNodeVisitEnd(ctx context.Context, info typedef.JudgeNode, vt typedef.VisitTarget) {
 	if info != nil {
 		logger.Infof("%v", *(info.(*arishemCondition)))
 	}
 }
 
-func (t *testArisVisitObserver) OnVisitError(node, errMsg string, vt typedef.VisitTarget) {
+func (t *testArisVisitObserver) OnVisitError(ctx context.Context, node, errMsg string, vt typedef.VisitTarget) {
 	t.errMsgs = append(t.errMsgs, errMsg)
 }
 
@@ -217,7 +218,7 @@ func TestConditionVisit(t *testing.T) {
 		t.Log(tc.name)
 		cdtCtx, err := parser.ParseArishemCondition(tc.expr)
 		assert.Nil(t, err)
-		dc, err := NewArishemDataCtx(tc.fact, &testFeatureFetcher{})
+		dc, err := NewArishemDataCtx(context.Background(), tc.fact, &testFeatureFetcher{})
 		assert.Nil(t, err)
 		arisVst := NewArishemRuleVisitor()
 		tavo := &testArisVisitObserver{hash: tc.name}
@@ -335,7 +336,7 @@ func TestAimVisit(t *testing.T) {
 		t.Log(tc.name)
 		cdtCtx, err := parser.ParseArishemAim(tc.expr)
 		assert.Nil(t, err)
-		dc, err := NewArishemDataCtx(tc.fact, &testFeatureFetcher{})
+		dc, err := NewArishemDataCtx(context.Background(), tc.fact, &testFeatureFetcher{})
 		assert.Nil(t, err)
 		arisVst := NewArishemRuleVisitor()
 		tavo := &testArisVisitObserver{hash: tc.name}

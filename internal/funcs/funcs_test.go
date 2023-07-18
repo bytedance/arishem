@@ -17,49 +17,58 @@
 package funcs
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestCalcListLength(t *testing.T) {
+	ctx := context.Background()
 	paramKeyList := "list"
 	paramKeyFilter := "filter_null"
 	params := map[string]interface{}{}
 	var length interface{}
+	var err error
 	// @case 1
 	params[paramKeyList] = nil
 	params[paramKeyFilter] = true
-	length = ListLength(params)
-	assert.NotNil(t, length)
-	assert.Zero(t, length)
+	length, err = ListLength(ctx, params)
+	assert.Nil(t, length)
+	assert.NotNil(t, err)
+	t.Log(err)
 	// @case 2
 	params[paramKeyList] = 3
 	params[paramKeyFilter] = true
-	length = ListLength(params)
+	length, err = ListLength(ctx, params)
+	assert.Nil(t, err)
 	assert.NotNil(t, length)
 	assert.Equal(t, 1, length)
 	// @case 3
 	params[paramKeyList] = "123"
 	params[paramKeyFilter] = true
-	length = ListLength(params)
+	length, err = ListLength(ctx, params)
+	assert.Nil(t, err)
 	assert.NotNil(t, length)
 	assert.Equal(t, 1, length)
 	// @case 4
 	params[paramKeyList] = []int64{}
 	params[paramKeyFilter] = true
-	length = ListLength(params)
+	length, err = ListLength(ctx, params)
+	assert.Nil(t, err)
 	assert.NotNil(t, length)
 	assert.Zero(t, length)
 	// @case 5
 	params[paramKeyList] = []interface{}{nil, nil}
 	params[paramKeyFilter] = true
-	length = ListLength(params)
+	length, err = ListLength(ctx, params)
+	assert.Nil(t, err)
 	assert.NotNil(t, length)
 	assert.Zero(t, length)
 	// @case 6
 	params[paramKeyList] = []interface{}{nil, nil}
 	params[paramKeyFilter] = false
-	length = ListLength(params)
+	length, err = ListLength(ctx, params)
+	assert.Nil(t, err)
 	assert.NotNil(t, length)
 	assert.Equal(t, 2, length)
 }

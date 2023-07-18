@@ -16,9 +16,14 @@
 
 package funcs
 
-func MapUnion(params []interface{}) interface{} {
+import (
+	"context"
+	"errors"
+)
+
+func MapUnion(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	kv := make(map[string]interface{}, len(params)*4)
 	for _, param := range params {
@@ -30,19 +35,19 @@ func MapUnion(params []interface{}) interface{} {
 			kv[k] = v
 		}
 	}
-	return kv
+	return kv, nil
 }
 
-func MapIntersect(params []interface{}) interface{} {
+func MapIntersect(ctx context.Context, params []interface{}) (interface{}, error) {
 	if len(params) <= 0 {
-		return nil
+		return nil, emptyParam
 	}
 	if len(params) == 1 {
 		m, ok := params[0].(map[string]interface{})
 		if !ok {
-			return nil
+			return nil, errors.New("[MapIntersect] param type not map")
 		}
-		return m
+		return m, nil
 	}
 	type bv struct {
 		val   interface{}
@@ -69,5 +74,5 @@ func MapIntersect(params []interface{}) interface{} {
 		}
 		finalMap[k] = v.val
 	}
-	return finalMap
+	return finalMap, nil
 }

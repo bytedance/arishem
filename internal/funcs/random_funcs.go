@@ -17,16 +17,17 @@
 package funcs
 
 import (
+	"context"
 	"fmt"
 	uuid "github.com/satori/go.uuid"
 	"strings"
 )
 
-func RandomUUID() interface{} {
-	return uuid.NewV4().String()
+func RandomUUID(ctx context.Context) (interface{}, error) {
+	return uuid.NewV4().String(), nil
 }
 
-func RandomUUIDWithReplacer(params map[string]interface{}) interface{} {
+func RandomUUIDWithReplacer(ctx context.Context, params map[string]interface{}) (interface{}, error) {
 	const (
 		keyReplacer = "replacer"
 	)
@@ -41,5 +42,5 @@ func RandomUUIDWithReplacer(params map[string]interface{}) interface{} {
 	if repHyphen && replacer != "-" {
 		u = strings.ReplaceAll(u, "-", replacer)
 	}
-	return u
+	return u, nil
 }

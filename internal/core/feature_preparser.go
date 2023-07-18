@@ -17,6 +17,7 @@
 package core
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
@@ -285,10 +286,9 @@ func (f *featurePreParserVisitor) VisitParamMapFunc(ctx *parser.ParamMapFuncCont
 			paramMap = paramI.(map[string]interface{})
 		}
 	}
-	res, err := funcs.InvokeFunc(funcname, paramMap, nil)
+	res, err := funcs.InvokeFunc(context.Background(), funcname, paramMap, nil)
 	if err != nil {
 		f.errMsgs.Add(node + ":" + err.Error())
-		return nil
 	}
 	return res
 }
@@ -297,7 +297,7 @@ func (f *featurePreParserVisitor) VisitParamListFunc(ctx *parser.ParamListFuncCo
 	const node = "VisitParamListFunc"
 	// get function name
 	funcname := ctx.FuncNamePair().NameKey().NAME_KEY_TYPE().GetText()
-	// param map
+	// param list
 	var paramList []interface{}
 	exprsCtx := ctx.Exprs()
 	if exprsCtx != nil {
@@ -306,10 +306,9 @@ func (f *featurePreParserVisitor) VisitParamListFunc(ctx *parser.ParamListFuncCo
 			paramList = paramI.([]interface{})
 		}
 	}
-	res, err := funcs.InvokeFunc(funcname, nil, paramList)
+	res, err := funcs.InvokeFunc(context.Background(), funcname, nil, paramList)
 	if err != nil {
 		f.errMsgs.Add(node + ":" + err.Error())
-		return nil
 	}
 	return res
 }
