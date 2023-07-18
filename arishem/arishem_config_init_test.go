@@ -21,7 +21,25 @@ import (
 )
 
 func init() {
-	Initialize(DefaultConfiguration(), WithFeatureFetcherFactory(func() typedef.FeatureFetcher {
-		return NewMyFeatureFetcher()
-	}))
+	Initialize(
+		DefaultConfiguration(),
+		WithFeatureFetcherFactory(func() typedef.FeatureFetcher {
+			return NewMyFeatureFetcher()
+		}),
+		WithCustomNoParamFuncs(NoParamFnPair{name: "NPHello", fn: MyCustomNoFuncHelloArishem}),
+		WithCustomMapParamFuncs(MapParamFnPair{name: "MPHello", fn: MyCustomMapFuncHelloArishem}),
+		WithCustomListParamFuncs(ListParamFnPair{name: "LPHello", fn: MyCustomListFuncHelloArishem}),
+	)
+}
+
+func MyCustomNoFuncHelloArishem() interface{} {
+	return "Hello Arishem"
+}
+
+func MyCustomMapFuncHelloArishem(param map[string]interface{}) interface{} {
+	return "Hello Arishem"
+}
+
+func MyCustomListFuncHelloArishem(param []interface{}) interface{} {
+	return "Hello Arishem"
 }
