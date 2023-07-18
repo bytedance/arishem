@@ -17,6 +17,7 @@
 package funcs
 
 import (
+	"context"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestMapUnion(t *testing.T) {
 		map[string]interface{}{"name": "3"},
 		map[string]interface{}{"name": "10", "age": 18},
 	}
-	union := MapUnion(params)
+	union, _ := MapUnion(context.Background(), params)
 	t.Log(union)
 }
 
@@ -38,6 +39,6 @@ func TestMapIntersect(t *testing.T) {
 		map[string]interface{}{"name": "3"},
 		map[string]interface{}{"name": "10", "age": 18},
 	}
-	intersect := MapIntersect(params)
+	intersect, _ := MapIntersect(context.Background(), params)
 	t.Log(intersect)
 }

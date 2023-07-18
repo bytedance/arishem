@@ -16,7 +16,10 @@
 
 package typedef
 
-import "github.com/antlr/antlr4/runtime/Go/antlr/v4"
+import (
+	"context"
+	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
+)
 
 // ParseObserver is the observer that can listen to rule parse events with token and parse error messages.
 type ParseObserver interface {
@@ -31,8 +34,8 @@ type VisitObserver interface {
 	Hashable
 
 	// OnJudgeNodeVisitEnd passes the condition node
-	OnJudgeNodeVisitEnd(info JudgeNode, vt VisitTarget)
-	OnVisitError(node, errMsg string, vt VisitTarget)
+	OnJudgeNodeVisitEnd(ctx context.Context, info JudgeNode, vt VisitTarget)
+	OnVisitError(ctx context.Context, node, errMsg string, vt VisitTarget)
 }
 
 // ObservableVisitor supports rule events callback behaviour.
@@ -46,8 +49,8 @@ type ObservableVisitor interface {
 type FeatureFetchObserver interface {
 	Hashable
 
-	OnFeatureFetchStart(feat FeatureParam)
-	OnFeatureFetchEnd(featureHash string, featureValue MetaType, err error)
+	OnFeatureFetchStart(ctx context.Context, feat FeatureParam)
+	OnFeatureFetchEnd(ctx context.Context, featureHash string, featureValue MetaType, err error)
 }
 
 // ObservableFeatureFetcher supports feature fetch events callback behaviour.

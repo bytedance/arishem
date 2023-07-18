@@ -17,6 +17,7 @@
 package funcs
 
 import (
+	"context"
 	"testing"
 )
 
@@ -24,6 +25,6 @@ func TestRandomUUIDWithParam(t *testing.T) {
 	params := map[string]interface{}{
 		"replacer": "<>",
 	}
-	uuid := RandomUUIDWithReplacer(params)
+	uuid, _ := RandomUUIDWithReplacer(context.Background(), params)
 	t.Log(uuid)
 }

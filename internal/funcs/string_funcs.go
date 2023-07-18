@@ -17,19 +17,21 @@
 package funcs
 
 import (
+	"context"
+	"errors"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/sonic"
 	"github.com/bytedance/sonic/encoder"
 )
 
-func MarshalString(params map[string]interface{}) interface{} {
+func MarshalString(ctx context.Context, params map[string]interface{}) (interface{}, error) {
 	const (
 		keyTarget     = "target"
 		keyEscapeHTML = "escape_html"
 	)
 	target, ok := params[keyTarget]
 	if !ok {
-		return nil
+		return nil, errors.New("[MarshalString] param: target not found")
 	}
 	var escapeHTML bool
 	espI, ok := params[keyEscapeHTML]
@@ -48,5 +50,5 @@ func MarshalString(params map[string]interface{}) interface{} {
 			str = m
 		}
 	}
-	return str
+	return str, nil
 }

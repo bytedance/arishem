@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -40,21 +41,21 @@ func TestFuncExprNoParam(t *testing.T) {
         }
     ]
 }`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
 
 func TestFuncExprParamList(t *testing.T) {
 	condition := `{"OpLogic":"&&","Conditions":[{"Operator":"LIST_CONTAINS","Lhs":{"FuncExpr":{"FuncName":"ListAdd","ParamList":[{"ConstList":[{"NumConst":1},{"NumConst":1}]},{"Const":{"NumConst":1}}]}},"Rhs":{"Const":{"NumConst":1}}}]}`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
 
 func TestFuncExprParamMap(t *testing.T) {
 	condition := `{"OpLogic":"&&","Conditions":[{"Operator":"LIST_CONTAINS","Lhs":{"FuncExpr":{"FuncName":"ListLength","ParamMap":{"list":{"ConstList":[{"NumConst":1},{"NumConst":1}]},"filter_null":{"Const":{"BoolConst":true}}}}},"Rhs":{"Const":{"NumConst":2}}}]}`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
@@ -78,7 +79,7 @@ func TestCustomNoParamFunc(t *testing.T) {
         }
     ]
 }`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
@@ -109,7 +110,7 @@ func TestCustomMapParamFunc(t *testing.T) {
         }
     ]
 }`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
@@ -140,7 +141,7 @@ func TestCustomListParamFunc(t *testing.T) {
         }
     ]
 }`
-	pass, err := JudgeCondition(condition)
+	pass, err := JudgeCondition(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }

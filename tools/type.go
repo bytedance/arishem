@@ -290,7 +290,7 @@ func ConvToBool(in interface{}) (out bool, err error) {
 func ConvToSliceUnifyType(in interface{}) (out []interface{}, err error) {
 	switch in.(type) {
 	case nil:
-		out = nil
+		err = ErrConvNil
 	case int, int8, int16, int32, int64:
 		t, _ := ConvToInt64(in)
 		out = []interface{}{t}

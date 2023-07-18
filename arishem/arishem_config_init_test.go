@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
 )
@@ -33,14 +34,14 @@ func init() {
 	)
 }
 
-func MyCustomNoFuncHelloArishem() interface{} {
-	return "Hello Arishem"
+func MyCustomNoFuncHelloArishem(ctx context.Context) (interface{}, error) {
+	return "Hello Arishem", nil
 }
 
-func MyCustomMapFuncHelloArishem(param map[string]interface{}) interface{} {
-	return "Hello " + tools.ConvToUnifiedStringType(param["name"])
+func MyCustomMapFuncHelloArishem(ctx context.Context, param map[string]interface{}) (interface{}, error) {
+	return "Hello " + tools.ConvToUnifiedStringType(param["name"]), nil
 }
 
-func MyCustomListFuncHelloArishem(param []interface{}) interface{} {
-	return "Hello " + tools.ConvToUnifiedStringType(param[0])
+func MyCustomListFuncHelloArishem(ctx context.Context, param []interface{}) (interface{}, error) {
+	return "Hello " + tools.ConvToUnifiedStringType(param[0]), nil
 }

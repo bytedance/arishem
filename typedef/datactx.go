@@ -16,6 +16,8 @@
 
 package typedef
 
+import "context"
+
 // SharedVisitCache is the interface that can pass data among multi visitors.
 type SharedVisitCache interface {
 	// Get will get cached node visit result by its alternative number, Set and Get must concurrent safe.
@@ -27,6 +29,8 @@ type SharedVisitCache interface {
 // DataCtx is the data context during the rule visitation.
 type DataCtx interface {
 	SharedVisitCache
+
+	Context() context.Context
 
 	FetcherFetcher() FeatureFetcher
 	PrefetchFeatures(feats []FeatureParam)

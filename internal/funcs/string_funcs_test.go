@@ -17,6 +17,7 @@
 package funcs
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -24,14 +25,14 @@ import (
 func TestMarshalString(t *testing.T) {
 	testCases := []struct {
 		param map[string]interface{}
-		check func(interface{})
+		check func(interface{}, error)
 	}{
 		{
 			map[string]interface{}{
 				"target":      false,
 				"escape_html": true,
 			},
-			func(i interface{}) {
+			func(i interface{}, err error) {
 				assert.NotNil(t, i)
 				assert.NotEmpty(t, i.(string))
 				assert.Equal(t, "false", i.(string))
@@ -48,7 +49,7 @@ func TestMarshalString(t *testing.T) {
 				},
 				"escape_html": true,
 			},
-			func(i interface{}) {
+			func(i interface{}, err error) {
 				assert.NotNil(t, i)
 				assert.NotEmpty(t, i.(string))
 				assert.Equal(t, `{"Name":"\u003cThunder\u003e","Age":18}`, i.(string))
@@ -64,7 +65,7 @@ func TestMarshalString(t *testing.T) {
 					18,
 				},
 			},
-			func(i interface{}) {
+			func(i interface{}, err error) {
 				assert.NotNil(t, i)
 				assert.NotEmpty(t, i.(string))
 				assert.Equal(t, `{"Name":"<Thunder>","Age":18}`, i.(string))
@@ -72,6 +73,6 @@ func TestMarshalString(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		tc.check(MarshalString(tc.param))
+		tc.check(MarshalString(context.Background(), tc.param))
 	}
 }

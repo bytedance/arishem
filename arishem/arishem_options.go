@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/internal/funcs"
 	"github.com/bytedance/arishem/typedef"
@@ -24,17 +25,17 @@ import (
 
 type NoParamFnPair struct {
 	Name string
-	Fn   func() interface{}
+	Fn   func(ctx context.Context) (interface{}, error)
 }
 
 type MapParamFnPair struct {
 	Name string
-	Fn   func(params map[string]interface{}) interface{}
+	Fn   func(ctx context.Context, params map[string]interface{}) (interface{}, error)
 }
 
 type ListParamFnPair struct {
 	Name string
-	Fn   func(params []interface{}) interface{}
+	Fn   func(ctx context.Context, params []interface{}) (interface{}, error)
 }
 
 func WithFeatureFetcherFactory(factory func() typedef.FeatureFetcher) core.Option {

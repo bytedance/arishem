@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/internal/parser"
@@ -35,8 +36,8 @@ func init() {
 	Initialize(DefaultConfiguration())
 	arishemBenchRules = buildArishemRules()
 	arishemBenchComplexRule = buildArishemComplexRule()
-	arishemBenchDc, _ = core.NewArishemDataCtx(`{}`, FeatureFetcherFactory())
-	arishemBenchComplexDc, _ = core.NewArishemDataCtx(`{"username":"Andrew","usernames":["Jack","Mike","Andrew"],"news":"Jack hanged out with Mike last weekend.","number1":100,"numbers":["10",99.9,0]}`, FeatureFetcherFactory())
+	arishemBenchDc, _ = core.NewArishemDataCtx(context.Background(), `{}`, FeatureFetcherFactory())
+	arishemBenchComplexDc, _ = core.NewArishemDataCtx(context.Background(), `{"username":"Andrew","usernames":["Jack","Mike","Andrew"],"news":"Jack hanged out with Mike last weekend.","number1":100,"numbers":["10",99.9,0]}`, FeatureFetcherFactory())
 }
 
 type nodeCounter struct{ count int }

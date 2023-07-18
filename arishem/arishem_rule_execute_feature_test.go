@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/typedef"
@@ -58,7 +59,7 @@ func (m *MyFeatureFetcher) ClearFetchObservers() {
 	m.observers = make(map[string]typedef.FeatureFetchObserver)
 }
 
-func (m *MyFeatureFetcher) FetchFeature(feat typedef.FeatureParam, dc typedef.DataCtx) (typedef.MetaType, error) {
+func (m *MyFeatureFetcher) FetchFeature(ctx context.Context, feat typedef.FeatureParam, dc typedef.DataCtx) (typedef.MetaType, error) {
 	switch feat.FeatureName() {
 	case "user":
 		if feat.BuiltinParam() != nil {
@@ -320,7 +321,7 @@ func NewMyObserver(name string) *MyObserver {
 	return &MyObserver{name: name, lock: &sync.RWMutex{}, timeMap: make(map[string]time.Time)}
 }
 
-func (m *MyObserver) OnFeatureFetchStart(feat typedef.FeatureParam) {
+func (m *MyObserver) OnFeatureFetchStart(ctx context.Context, feat typedef.FeatureParam) {
 	now := time.Now()
 	fmt.Printf("%v feature=>%s start fetch, paramHash=>%s\n", now, feat.HashCode(), core.GenBuiltinParamHash(feat.BuiltinParam()))
 	m.lock.Lock()
@@ -328,7 +329,7 @@ func (m *MyObserver) OnFeatureFetchStart(feat typedef.FeatureParam) {
 	m.timeMap[feat.HashCode()] = now
 }
 
-func (m *MyObserver) OnFeatureFetchEnd(featureHash string, featureValue typedef.MetaType, err error) {
+func (m *MyObserver) OnFeatureFetchEnd(ctx context.Context, featureHash string, featureValue typedef.MetaType, err error) {
 	now := time.Now()
 	fmt.Printf("%v feature=>%s end fetch\n", now, featureHash)
 
@@ -341,18 +342,18 @@ func (m *MyObserver) HashCode() string {
 	return m.name
 }
 
-func (m *MyObserver) OnJudgeNodeVisitEnd(info typedef.JudgeNode, vt typedef.VisitTarget) {
+func (m *MyObserver) OnJudgeNodeVisitEnd(ctx context.Context, info typedef.JudgeNode, vt typedef.VisitTarget) {
 	fmt.Printf("rule:%s judge node passed: %v, left(%v) %s right(%v)\n", vt.Identifier(), info.Passed(), info.Left(), info.Operator(), info.Right())
 }
 
-func (m *MyObserver) OnVisitError(node, errMsg string, vt typedef.VisitTarget) {
+func (m *MyObserver) OnVisitError(ctx context.Context, node, errMsg string, vt typedef.VisitTarget) {
 	logger.Infof("error=>%v during node=>%v\n", errMsg, node)
 }
 
 func TestFeatureFetcher(t *testing.T) {
 	rules := buildFeaturesArishemRules()
 	st := time.Now()
-	dc, _ := DataContext(`{"user1":{"name":"John","age":30},"user2":{"name":"Jane","age":18},"rate":[1.0,2.0,5.0]}`)
+	dc, _ := DataContext(context.Background(), `{"user1":{"name":"John","age":30},"user2":{"name":"Jane","age":18},"rate":[1.0,2.0,5.0]}`)
 	observer := NewMyObserver("my observer")
 	rrs := ExecuteRules(rules, dc, WithVisitObserver(observer), WithFeatureFetchObserver(observer))
 	t.Logf("execute rules total cost=>%v", time.Since(st))

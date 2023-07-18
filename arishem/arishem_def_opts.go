@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"context"
 	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/internal/pool"
 	"github.com/bytedance/arishem/tools"
@@ -104,7 +105,7 @@ func (d *defaultFeatureFeature) GetFetchObservers() []typedef.FeatureFetchObserv
 
 func (d *defaultFeatureFeature) ClearFetchObservers() {}
 
-func (d *defaultFeatureFeature) FetchFeature(feat typedef.FeatureParam, dc typedef.DataCtx) (typedef.MetaType, error) {
+func (d *defaultFeatureFeature) FetchFeature(ctx context.Context, feat typedef.FeatureParam, dc typedef.DataCtx) (typedef.MetaType, error) {
 	return nil, nil
 }
 
