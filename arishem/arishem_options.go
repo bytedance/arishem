@@ -23,18 +23,18 @@ import (
 )
 
 type NoParamFnPair struct {
-	name string
-	fn   func() interface{}
+	Name string
+	Fn   func() interface{}
 }
 
 type MapParamFnPair struct {
-	name string
-	fn   func(params map[string]interface{}) interface{}
+	Name string
+	Fn   func(params map[string]interface{}) interface{}
 }
 
 type ListParamFnPair struct {
-	name string
-	fn   func(params []interface{}) interface{}
+	Name string
+	Fn   func(params []interface{}) interface{}
 }
 
 func WithFeatureFetcherFactory(factory func() typedef.FeatureFetcher) core.Option {
@@ -64,7 +64,7 @@ func WithFeatureFetchObserver(obs ...typedef.FeatureFetchObserver) core.ExecuteO
 func WithCustomNoParamFuncs(funcPairs ...NoParamFnPair) core.Option {
 	return func(cfg *core.Configuration) {
 		for _, pair := range funcPairs {
-			funcs.RegNoPramFunc(pair.name, pair.fn)
+			funcs.RegNoPramFunc(pair.Name, pair.Fn)
 		}
 	}
 }
@@ -72,7 +72,7 @@ func WithCustomNoParamFuncs(funcPairs ...NoParamFnPair) core.Option {
 func WithCustomMapParamFuncs(funcPairs ...MapParamFnPair) core.Option {
 	return func(cfg *core.Configuration) {
 		for _, pair := range funcPairs {
-			funcs.RegMapParamFunc(pair.name, pair.fn)
+			funcs.RegMapParamFunc(pair.Name, pair.Fn)
 		}
 	}
 }
@@ -80,7 +80,7 @@ func WithCustomMapParamFuncs(funcPairs ...MapParamFnPair) core.Option {
 func WithCustomListParamFuncs(funcPairs ...ListParamFnPair) core.Option {
 	return func(cfg *core.Configuration) {
 		for _, pair := range funcPairs {
-			funcs.RegListParamFunc(pair.name, pair.fn)
+			funcs.RegListParamFunc(pair.Name, pair.Fn)
 		}
 	}
 }

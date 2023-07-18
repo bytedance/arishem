@@ -17,6 +17,7 @@
 package arishem
 
 import (
+	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
 )
 
@@ -26,9 +27,9 @@ func init() {
 		WithFeatureFetcherFactory(func() typedef.FeatureFetcher {
 			return NewMyFeatureFetcher()
 		}),
-		WithCustomNoParamFuncs(NoParamFnPair{name: "NPHello", fn: MyCustomNoFuncHelloArishem}),
-		WithCustomMapParamFuncs(MapParamFnPair{name: "MPHello", fn: MyCustomMapFuncHelloArishem}),
-		WithCustomListParamFuncs(ListParamFnPair{name: "LPHello", fn: MyCustomListFuncHelloArishem}),
+		WithCustomNoParamFuncs(NoParamFnPair{Name: "NPHello", Fn: MyCustomNoFuncHelloArishem}),
+		WithCustomMapParamFuncs(MapParamFnPair{Name: "MPHello", Fn: MyCustomMapFuncHelloArishem}),
+		WithCustomListParamFuncs(ListParamFnPair{Name: "LPHello", Fn: MyCustomListFuncHelloArishem}),
 	)
 }
 
@@ -37,9 +38,9 @@ func MyCustomNoFuncHelloArishem() interface{} {
 }
 
 func MyCustomMapFuncHelloArishem(param map[string]interface{}) interface{} {
-	return "Hello Arishem"
+	return "Hello " + tools.ConvToUnifiedStringType(param["name"])
 }
 
 func MyCustomListFuncHelloArishem(param []interface{}) interface{} {
-	return "Hello Arishem"
+	return "Hello " + tools.ConvToUnifiedStringType(param[0])
 }

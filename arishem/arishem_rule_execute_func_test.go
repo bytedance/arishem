@@ -59,7 +59,7 @@ func TestFuncExprParamMap(t *testing.T) {
 	assert.True(t, pass)
 }
 
-func TestCustomFunc(t *testing.T) {
+func TestCustomNoParamFunc(t *testing.T) {
 	condition := `{
     "OpLogic": "&&",
     "Conditions": [
@@ -73,6 +73,68 @@ func TestCustomFunc(t *testing.T) {
             "Rhs": {
                 "Const": {
                     "StrConst": "Hello Arishem"
+                }
+            }
+        }
+    ]
+}`
+	pass, err := JudgeCondition(condition)
+	assert.Nil(t, err)
+	assert.True(t, pass)
+}
+
+func TestCustomMapParamFunc(t *testing.T) {
+	condition := `{
+    "OpLogic": "&&",
+    "Conditions": [
+        {
+            "Operator": "==",
+            "Lhs": {
+                "FuncExpr": {
+                    "FuncName": "MPHello",
+                    "ParamMap": {
+                        "name": {
+                            "Const": {
+                                "StrConst": "Arishem[MapParam]"
+                            }
+                        }
+                    }
+                }
+            },
+            "Rhs": {
+                "Const": {
+                    "StrConst": "Hello Arishem[MapParam]"
+                }
+            }
+        }
+    ]
+}`
+	pass, err := JudgeCondition(condition)
+	assert.Nil(t, err)
+	assert.True(t, pass)
+}
+
+func TestCustomListParamFunc(t *testing.T) {
+	condition := `{
+    "OpLogic": "&&",
+    "Conditions": [
+        {
+            "Operator": "==",
+            "Lhs": {
+                "FuncExpr": {
+                    "FuncName": "LPHello",
+                    "ParamList": [
+                        {
+                            "Const": {
+                                "StrConst": "Arishem[ListParam]"
+                            }
+                        }
+                    ]
+                }
+            },
+            "Rhs": {
+                "Const": {
+                    "StrConst": "Hello Arishem[ListParam]"
                 }
             }
         }
