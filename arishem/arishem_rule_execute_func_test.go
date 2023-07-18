@@ -58,3 +58,27 @@ func TestFuncExprParamMap(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, pass)
 }
+
+func TestCustomFunc(t *testing.T) {
+	condition := `{
+    "OpLogic": "&&",
+    "Conditions": [
+        {
+            "Operator": "==",
+            "Lhs": {
+                "FuncExpr": {
+    				"FuncName": "NPHello"
+				}
+            },
+            "Rhs": {
+                "Const": {
+                    "StrConst": "Hello Arishem"
+                }
+            }
+        }
+    ]
+}`
+	pass, err := JudgeCondition(condition)
+	assert.Nil(t, err)
+	assert.True(t, pass)
+}

@@ -18,8 +18,24 @@ package arishem
 
 import (
 	"github.com/bytedance/arishem/internal/core"
+	"github.com/bytedance/arishem/internal/funcs"
 	"github.com/bytedance/arishem/typedef"
 )
+
+type NoParamFnPair struct {
+	name string
+	fn   func() interface{}
+}
+
+type MapParamFnPair struct {
+	name string
+	fn   func(params map[string]interface{}) interface{}
+}
+
+type ListParamFnPair struct {
+	name string
+	fn   func(params []interface{}) interface{}
+}
 
 func WithFeatureFetcherFactory(factory func() typedef.FeatureFetcher) core.Option {
 	return func(cfg *core.Configuration) {
@@ -41,6 +57,30 @@ func WithFeatureFetchObserver(obs ...typedef.FeatureFetchObserver) core.ExecuteO
 	return func(rv typedef.RuleVisitor, dc typedef.DataCtx) {
 		if dc != nil && dc.FetcherFetcher() != nil {
 			dc.FetcherFetcher().AddFetchObserver(obs...)
+		}
+	}
+}
+
+func WithCustomNoParamFuncs(funcPairs ...NoParamFnPair) core.Option {
+	return func(cfg *core.Configuration) {
+		for _, pair := range funcPairs {
+			funcs.RegNoPramFunc(pair.name, pair.fn)
+		}
+	}
+}
+
+func WithCustomMapParamFuncs(funcPairs ...MapParamFnPair) core.Option {
+	return func(cfg *core.Configuration) {
+		for _, pair := range funcPairs {
+			funcs.RegMapParamFunc(pair.name, pair.fn)
+		}
+	}
+}
+
+func WithCustomListParamFuncs(funcPairs ...ListParamFnPair) core.Option {
+	return func(cfg *core.Configuration) {
+		for _, pair := range funcPairs {
+			funcs.RegListParamFunc(pair.name, pair.fn)
 		}
 	}
 }
