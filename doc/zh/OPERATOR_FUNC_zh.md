@@ -83,3 +83,43 @@ arishem内置函数分为3类，不需要参数的func、参数为列表的func�
 | ListJoin                  | 两个参数：**list**：数组元素,sep分隔符           | string     | 将list中的元素通过sep拼接成一个字符串                        | "list": [1.23, 2.45], "sep":  ",", -> "1.23,2.45""list": [1.23, 2.45], "sep":  "-", -> "1.23-2.45" |                                                              |
 | RandomUUIDWithReplacer    | 一个参数：**replacer(可选)：**将替换原有UUID自带的分隔符"-"  | string     | 将UUID自带的"-"分隔符用replacer进行替换，返回新连接符的UUID  | replacer："" 8e1d6b823f6f38bb3eb7c7b3556286c3replacer: "#" c804d25d#b6d0#8e31#1e30#e72188745f42 |                                                              |
 | MarshalString | 两个参数：<br />1.target：要encoding的对象<br />2. escape_html：是否转移html特殊字符 | string | target可以为任意类型 |  | |
+
+## 注册自定义函数
+在arishem初始化时，通过三种option注册三种类型入参的自定义函数。
+```go
+func init() {
+    arishem.Initialize(
+        arishem.DefaultConfiguration(),
+        arishem.WithFeatureFetcherFactory(func() typedef.FeatureFetcher {
+            return new(MyFeatureFetcher)
+        }),
+        arishem.WithCustomNoParamFuncs(arishem.NoParamFnPair{Name: "NPGreeting", Fn: func(ctx context.Context) (interface{}, error) {
+            return "hello arishem", nil
+        }}),
+        arishem.WithCustomMapParamFuncs(MapParamFnPair{Name: "MPGreeting", Fn: func(ctx context.Context, params map[string]interface{}) (interface{}, error) {
+            return "Hello " + tools.ConvToUnifiedStringType(param["name"]), nil
+        }}),
+        arishem.WithCustomListParamFuncs(ListParamFnPair{Name: "LPGreeting", Fn: func(ctx context.Context, params []interface{}) (interface{}, error) {
+            return "Hello " + tools.ConvToUnifiedStringType(param[0]), nil
+        }}),
+    )
+}
+```
+- 无参数的自定义函数
+```go
+WithCustomNoParamFuncs(arishem.NoParamFnPair{Name: "NPGreeting", Fn: func(ctx context.Context) (interface{}, error) {
+    return "hello arishem", nil
+}}),
+```
+- Map参数类型的自定义函数
+```go
+WithCustomMapParamFuncs(MapParamFnPair{Name: "MPGreeting", Fn: func(ctx context.Context, params map[string]interface{}) (interface{}, error) {
+    return "Hello " + tools.ConvToUnifiedStringType(param["name"]), nil
+}}),
+```
+- List参数类型的自定义函数
+```go
+WithCustomListParamFuncs(ListParamFnPair{Name: "LPGreeting", Fn: func(ctx context.Context, params []interface{}) (interface{}, error) {
+    return "Hello " + tools.ConvToUnifiedStringType(param[0]), nil
+}}),
+```
