@@ -74,6 +74,7 @@ func ApplyExecuteOptions(rv typedef.RuleVisitor, dc typedef.DataCtx, opts ...Exe
 
 func DefaultConfiguration() *Configuration {
 	c := new(Configuration)
+	c.Prefetch = true
 	ApplyOptions(c,
 		WithDefTreeCache(),
 		WithDefMaxParallels(),
