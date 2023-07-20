@@ -143,7 +143,7 @@ func (p *PriorityRule) Compare(other typedef.Comparable) int {
 	return cmp
 }
 
-func tryParse(cdtExpr, aimExpr string) (cdtTree, aimTree *core.RuleTree, err error) {
+func tryParse(cdtExpr, aimExpr string) (cdtTree, aimTree *RuleTree, err error) {
 	// compat two expressions
 	cdtExpr, err = tools.Compat(cdtExpr)
 	if err != nil {
@@ -205,7 +205,7 @@ func tryParse(cdtExpr, aimExpr string) (cdtTree, aimTree *core.RuleTree, err err
 	return
 }
 
-func parseRuleTree(exprStr string, expT exprType) (exprTree *core.RuleTree, err error) {
+func parseRuleTree(exprStr string, expT exprType) (exprTree *RuleTree, err error) {
 	fppl := core.NewFeaturePreParseListener()
 
 	var treeCtx antlr.ParseTree
@@ -223,6 +223,6 @@ func parseRuleTree(exprStr string, expT exprType) (exprTree *core.RuleTree, err 
 	if err != nil {
 		return
 	}
-	exprTree = &core.RuleTree{Tree: treeCtx, FeatParams: featParams}
+	exprTree = &RuleTree{Tree: treeCtx, FeatParams: featParams}
 	return
 }

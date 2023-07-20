@@ -40,7 +40,7 @@ func DataContext(ctx context.Context, json string) (dc typedef.DataCtx, err erro
 }
 
 // ParseCondition will parse a condition string and return the rule tree with feature parameter pre-parsed.
-func ParseCondition(condition string) (tree *core.RuleTree, err error) {
+func ParseCondition(condition string) (tree *RuleTree, err error) {
 	condition = strings.TrimSpace(condition)
 	if condition == "" {
 		err = errors.New("empty cond text")
@@ -67,12 +67,12 @@ func ParseCondition(condition string) (tree *core.RuleTree, err error) {
 }
 
 // JudgeCondition will judge the condition string, pass will be set true if condition passed.
-func JudgeCondition(ctx context.Context, condition string, opts ...core.ExecuteOption) (pass bool, err error) {
+func JudgeCondition(ctx context.Context, condition string, opts ...ExecuteOption) (pass bool, err error) {
 	return JudgeConditionWithFactMeta(ctx, condition, "{}", opts...)
 }
 
 // JudgeConditionWithFactMeta will judge the condition string with fact meta, pass will be set true if condition passed.
-func JudgeConditionWithFactMeta(ctx context.Context, condition, factMeta string, opts ...core.ExecuteOption) (pass bool, err error) {
+func JudgeConditionWithFactMeta(ctx context.Context, condition, factMeta string, opts ...ExecuteOption) (pass bool, err error) {
 	tree, err := ParseCondition(condition)
 	if err != nil {
 		return
@@ -91,7 +91,7 @@ func JudgeConditionWithFactMeta(ctx context.Context, condition, factMeta string,
 		return
 	}
 	rv := core.NewArishemRuleVisitor()
-	core.ApplyExecuteOptions(rv, dc, opts...)
+	ApplyExecuteOptions(rv, dc, opts...)
 	if len(tree.FeatParams) > 0 {
 		dc.PrefetchFeatures(tree.FeatParams)
 	}

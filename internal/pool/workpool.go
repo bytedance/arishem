@@ -17,6 +17,7 @@
 package pool
 
 import (
+	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/gopkg/util/logger"
 	"runtime"
 	"runtime/debug"
@@ -24,12 +25,9 @@ import (
 	"time"
 )
 
-// Task execute mission with the parameter
-type Task func(param interface{})
-
 // taskHolder is the pool task define which hold parameter
 type taskHolder struct {
-	fn Task
+	fn typedef.Task
 	// param is the parameter that task can hold and pass it when task is scheduled
 	param interface{}
 }
@@ -60,7 +58,7 @@ func NewWorkPool(maxIdle int, maxIdleTime time.Duration) *WorkPool {
 }
 
 // Submit a task and run
-func (wp *WorkPool) Submit(t Task, p interface{}) {
+func (wp *WorkPool) Submit(t typedef.Task, p interface{}) {
 	if t == nil {
 		return
 	}
@@ -71,7 +69,7 @@ func (wp *WorkPool) Submit(t Task, p interface{}) {
 }
 
 // SubmitWait submit the task and wait it util finish
-func (wp *WorkPool) SubmitWait(t Task, p interface{}) {
+func (wp *WorkPool) SubmitWait(t typedef.Task, p interface{}) {
 	if t == nil {
 		return
 	}
