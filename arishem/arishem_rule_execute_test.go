@@ -26,13 +26,13 @@ import (
 func TestExecuteSingleRule(t *testing.T) {
 	testCases := []struct {
 		name     string
-		rule     func() core.RuleTarget
+		rule     func() RuleTarget
 		factMeta string
-		check    func(rrs core.RuleResult)
+		check    func(rrs RuleResult)
 	}{
 		{
 			"rule3",
-			func() (rt core.RuleTarget) {
+			func() (rt RuleTarget) {
 				rt, _ = NewPriorityRule("p-rule3", 3, `{
     "OpLogic": "&&",
     "Conditions": [
@@ -58,7 +58,7 @@ func TestExecuteSingleRule(t *testing.T) {
 				return
 			},
 			`{}`,
-			func(rr core.RuleResult) {
+			func(rr RuleResult) {
 				assert.NotNil(t, rr)
 				assert.False(t, rr.Passed())
 				assert.Nil(t, rr.Aim())
@@ -66,7 +66,7 @@ func TestExecuteSingleRule(t *testing.T) {
 		},
 		{
 			"rule5",
-			func() (rt core.RuleTarget) {
+			func() (rt RuleTarget) {
 				rt, _ = NewPriorityRule("p-rule5", 5, `{
     "OpLogic": "&&",
     "Conditions": [
@@ -92,7 +92,7 @@ func TestExecuteSingleRule(t *testing.T) {
 				return
 			},
 			`{}`,
-			func(rr core.RuleResult) {
+			func(rr RuleResult) {
 				assert.NotNil(t, rr)
 				assert.True(t, rr.Passed())
 				assert.NotNil(t, rr.Aim())
@@ -114,13 +114,13 @@ func TestExecuteSingleRule(t *testing.T) {
 func TestExecuteRules(t *testing.T) {
 	testCases := []struct {
 		name     string
-		rules    func() []core.RuleTarget
+		rules    func() []RuleTarget
 		factMeta string
-		check    func(rrs []core.RuleResult)
+		check    func(rrs []RuleResult)
 	}{
 		{
 			"multi rules with priority",
-			func() (rt []core.RuleTarget) {
+			func() (rt []RuleTarget) {
 				pr, err := NewPriorityRule("p-rule3", 3, `{
     "OpLogic": "&&",
     "Conditions": [
@@ -338,7 +338,7 @@ func TestExecuteRules(t *testing.T) {
 				return
 			},
 			"{}",
-			func(rrs []core.RuleResult) {
+			func(rrs []RuleResult) {
 				assert.Len(t, rrs, 4)
 				for _, rr := range rrs {
 					assert.Contains(t, []string{"p-rule1", "np-rule1", "np-rule2", "np-rule3"}, rr.Identifier())

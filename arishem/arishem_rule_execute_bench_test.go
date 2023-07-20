@@ -26,8 +26,8 @@ import (
 )
 
 var (
-	arishemBenchRules       []core.RuleTarget
-	arishemBenchComplexRule core.RuleTarget
+	arishemBenchRules       []RuleTarget
+	arishemBenchComplexRule RuleTarget
 	arishemBenchComplexDc   typedef.DataCtx
 	arishemBenchDc          typedef.DataCtx
 )
@@ -53,7 +53,7 @@ func (n *nodeCounter) ExitEveryRule(ctx antlr.ParserRuleContext, tokenErrMsgs, p
 	n.count++
 }
 
-func buildArishemComplexRule() core.RuleTarget {
+func buildArishemComplexRule() RuleTarget {
 	condCounter := &nodeCounter{}
 	aimCounter := &nodeCounter{}
 	condition, err := parser.ParseArishemCondition(`{"OpLogic":"||","ConditionGroups":[{"OpLogic":"&&","Conditions":[{"Operator":"STRING_START_WITH","Lhs":{"VarExpr":"username"},"Rhs":{"Const":{"StrConst":"Banana"}}},{"Operator":"STRING_END_WITH","Lhs":{"VarExpr":"usernames#1"},"Rhs":{"Const":{"StrConst":"A"}}},{"Operator":"STRING_END_WITH","Lhs":{"VarExpr":"usernames#0"},"Rhs":{"Const":{"StrConst":"hahaha"}}},{"Operator":"CONTAIN_REGULAR","Lhs":{"VarExpr":"usernames#0"},"Rhs":{"Const":{"StrConst":"^M.*"}}}]},{"OpLogic":"and","ConditionGroups":[{"OpLogic":"&&","ConditionGroups":[{"OpLogic":"||","Conditions":[{"Operator":"<=","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"<=","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"<=","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"<=","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"<","Lhs":{"Const":{"NumConst":100}},"Rhs":{"Const":{"NumConst":10}}}]}]},{"OpLogic":"&&","Conditions":[{"Operator":"LIST_IN","Lhs":{"VarExpr":"number1"},"Rhs":{"ConstList":[{"NumConst":1},{"NumConst":98},{"NumConst":101},{"NumConst":1.32e-3},{"NumConst":12.234},{"NumConst":-1}]}},{"Operator":"!LIST_IN","Lhs":{"VarExpr":"numbers#0"},"Rhs":{"ConstList":[{"NumConst":1},{"NumConst":99},{"NumConst":999},{"NumConst":1.32e-3},{"NumConst":10},{"NumConst":-1}]}},{"Operator":"LIST_CONTAINS","Lhs":{"VarExpr":"numbers"},"Rhs":{"MathExpr":{"OpMath":"+","ParamList":[{"Const":{"NumConst":6}},{"Const":{"StrConst":"5"}}]}}},{"Operator":"LIST_RETAIN","Lhs":{"VarExpr":"numbers"},"Rhs":{"MathExpr":{"OpMath":"+","ParamList":[{"Const":{"NumConst":6}},{"Const":{"StrConst":"5"}}]}}},{"Operator":"LIST_RETAIN","Lhs":{"VarExpr":"numbers"},"Rhs":{"ConstList":[{"StrConst":"-1"},{"BoolConst":true},{"NumConst":-3.1415926}]}},{"Operator":"!LIST_RETAIN","Lhs":{"VarExpr":"numbers"},"Rhs":{"ConstList":[{"StrConst":"-1"},{"BoolConst":true},{"NumConst":-3.1415926}]}}]}]},{"OpLogic":"&&","Conditions":[{"Operator":"==","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":1}}}]}]}`, condCounter)
@@ -80,8 +80,8 @@ func buildArishemComplexRule() core.RuleTarget {
 	return &NoPriorityRule{name: "complex rule", cond: condition, aim: aim}
 }
 
-func buildArishemRules() []core.RuleTarget {
-	var rt []core.RuleTarget
+func buildArishemRules() []RuleTarget {
+	var rt []RuleTarget
 	pr, err := NewPriorityRule("p-rule3", 3, `{
     "OpLogic": "&&",
     "Conditions": [
@@ -313,6 +313,6 @@ func BenchmarkExecuteArishemRule(b *testing.B) {
 
 func BenchmarkSingleComplexRule(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ExecuteRules([]core.RuleTarget{arishemBenchComplexRule}, arishemBenchComplexDc)
+		ExecuteRules([]RuleTarget{arishemBenchComplexRule}, arishemBenchComplexDc)
 	}
 }

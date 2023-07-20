@@ -27,6 +27,24 @@ import (
 	"sync"
 )
 
+type RuleTarget interface {
+	typedef.Comparable
+	typedef.VisitTarget
+
+	ConditionPTree() antlr.ParseTree
+	AimPTree() antlr.ParseTree
+
+	CondFeatParams() []typedef.FeatureParam
+	AimFeatParams() []typedef.FeatureParam
+}
+
+type RuleResult interface {
+	typedef.VisitTarget
+
+	Passed() bool
+	Aim() typedef.Aim
+}
+
 type exprType int
 
 const (
@@ -66,8 +84,8 @@ type PriorityRule struct {
 }
 
 // NewPriorityRule will create a new rule with priority.
-func NewPriorityRule(name string, priority int, cdtExpr, aimExpr string) (pr core.RuleTarget, err error) {
-	var npr core.RuleTarget
+func NewPriorityRule(name string, priority int, cdtExpr, aimExpr string) (pr RuleTarget, err error) {
+	var npr RuleTarget
 	npr, err = NewNoPriorityRule(name, cdtExpr, aimExpr)
 	if err != nil {
 		return
@@ -77,7 +95,7 @@ func NewPriorityRule(name string, priority int, cdtExpr, aimExpr string) (pr cor
 }
 
 // NewNoPriorityRule will create a new rule with no priority.
-func NewNoPriorityRule(name string, cdtExpr, aimExpr string) (npr core.RuleTarget, err error) {
+func NewNoPriorityRule(name string, cdtExpr, aimExpr string) (npr RuleTarget, err error) {
 	cdtExpr = strings.TrimSpace(cdtExpr)
 	if cdtExpr == "" {
 		err = errors.New("cond expression is empty")
