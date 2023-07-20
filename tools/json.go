@@ -21,11 +21,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bytedance/sonic"
-	"github.com/bytedance/sonic/decoder"
 	"github.com/bytedance/sonic/encoder"
 	fastjson "github.com/goccy/go-json"
 	"strings"
 )
+
+var sonicUseInt64 = sonic.Config{
+	UseInt64: true,
+}.Froze()
 
 // ConvToJSONValidStr convert in to json valid string, basic type will use fmt.Sprint，complex type use json marshal
 func ConvToJSONValidStr(in interface{}) (string, error) {
@@ -49,10 +52,8 @@ func UnmarshalToSliceUseInt64(jsonStr string) ([]interface{}, error) {
 	if IsBlank(jsonStr) {
 		return nil, errors.New("json string is empty")
 	}
-	dc := decoder.NewDecoder(jsonStr)
-	dc.UseInt64()
 	var arr []interface{}
-	err := dc.Decode(&arr)
+	err := sonicUseInt64.UnmarshalFromString(jsonStr, &arr)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +65,9 @@ func UnmarshalToMapUseInt64(jsonStr string) (map[string]interface{}, error) {
 	if IsBlank(jsonStr) {
 		return nil, errors.New("json string is empty")
 	}
-	dc := decoder.NewDecoder(jsonStr)
-	dc.UseInt64()
+
 	var kv map[string]interface{}
-	err := dc.Decode(&kv)
+	err := sonicUseInt64.UnmarshalFromString(jsonStr, &kv)
 	if err != nil {
 		return nil, err
 	}
