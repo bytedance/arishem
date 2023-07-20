@@ -64,7 +64,7 @@ func (m *MyFeatureFetcher) FetchFeature(ctx context.Context, feat typedef.Featur
 	case "user":
 		if feat.BuiltinParam() != nil {
 			time.Sleep(100 * time.Millisecond)
-			if feat.BuiltinParam()["user_id"] != uint64(100) {
+			if feat.BuiltinParam()["user_id"] != int64(100) {
 				panic("error param")
 			}
 			name, _ := dc.GetVarValue([]string{"user1", "name"})
@@ -334,7 +334,7 @@ func (m *MyObserver) OnFeatureFetchEnd(ctx context.Context, featureHash string, 
 	fmt.Printf("%v feature=>%s end fetch\n", now, featureHash)
 
 	m.lock.RLock()
-	defer m.lock.RLock()
+	defer m.lock.RUnlock()
 	fmt.Printf("feature=>%s end, cost time=>%v\n", featureHash, time.Since(m.timeMap[featureHash]))
 }
 

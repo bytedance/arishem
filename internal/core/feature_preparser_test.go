@@ -181,7 +181,7 @@ func TestFeatPreParser(t *testing.T) {
 						assert.Equal(t, "user_profile", fp.FeatureName())
 						assert.NotNil(t, fp.BuiltinParam())
 						assert.Len(t, fp.BuiltinParam(), 1)
-						assert.Equal(t, uint64(1234567), fp.BuiltinParam()["user_id"])
+						assert.Equal(t, int64(1234567), fp.BuiltinParam()["user_id"])
 					}
 				}
 			},
@@ -199,7 +199,24 @@ func TestFeatPreParser(t *testing.T) {
 					assert.Equal(t, "user_center", fp.FeatureName())
 					assert.NotNil(t, fp.BuiltinParam())
 					assert.Len(t, fp.BuiltinParam(), 1)
-					assert.Equal(t, uint64(1234567), fp.BuiltinParam()["user_id"])
+					assert.Equal(t, int64(1234567), fp.BuiltinParam()["user_id"])
+				}
+			},
+		},
+		{
+			"AIM: expr aim with logic MathExpr",
+			exprTypeAim,
+			`{"MapExpr":{"UserPersonality":{"FeatureExpr":{"FeaturePath":"user_center.user_personality","BuiltinParam":{"isAdult":{"MathExpr":{"OpMath":">","Lhs":{"Const":{"NumConst":24}},"Rhs":{"Const":{"NumConst":18}}}}}}}}}`,
+			func(featParams []typedef.FeatureParam) {
+				assert.Len(t, featParams, 1)
+				for _, param := range featParams {
+					assert.NotNil(t, param)
+					fp := param
+
+					assert.Equal(t, "user_center", fp.FeatureName())
+					assert.NotNil(t, fp.BuiltinParam())
+					assert.Len(t, fp.BuiltinParam(), 1)
+					assert.Equal(t, true, fp.BuiltinParam()["isAdult"])
 				}
 			},
 		},

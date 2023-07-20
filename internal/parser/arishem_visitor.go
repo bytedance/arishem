@@ -236,14 +236,26 @@ type arishemVisitor interface {
 	// Visit a parse tree produced by arishemParser#opMathKey.
 	VisitOpMathKey(ctx *OpMathKeyContext) interface{}
 
-	// Visit a parse tree produced by arishemParser#opMathVal.
-	VisitOpMathVal(ctx *OpMathValContext) interface{}
+	// Visit a parse tree produced by arishemParser#lrOpMathVal.
+	VisitLrOpMathVal(ctx *LrOpMathValContext) interface{}
 
-	// Visit a parse tree produced by arishemParser#opMathPair.
-	VisitOpMathPair(ctx *OpMathPairContext) interface{}
+	// Visit a parse tree produced by arishemParser#listOpMathVal.
+	VisitListOpMathVal(ctx *ListOpMathValContext) interface{}
 
-	// Visit a parse tree produced by arishemParser#mathOperator.
-	VisitMathOperator(ctx *MathOperatorContext) interface{}
+	// Visit a parse tree produced by arishemParser#lrOpMathPair.
+	VisitLrOpMathPair(ctx *LrOpMathPairContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#listOpMathPair.
+	VisitListOpMathPair(ctx *ListOpMathPairContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#listMathOperator.
+	VisitListMathOperator(ctx *ListMathOperatorContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#lrMathOperator.
+	VisitLrMathOperator(ctx *LrMathOperatorContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#logicMathOperator.
+	VisitLogicMathOperator(ctx *LogicMathOperatorContext) interface{}
 
 	// Visit a parse tree produced by arishemParser#funcNameKey.
 	VisitFuncNameKey(ctx *FuncNameKeyContext) interface{}
@@ -295,4 +307,7 @@ type arishemVisitor interface {
 
 	// Visit a parse tree produced by arishemParser#boolConstKey.
 	VisitBoolConstKey(ctx *BoolConstKeyContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#operator.
+	VisitOperator(ctx *OperatorContext) interface{}
 }

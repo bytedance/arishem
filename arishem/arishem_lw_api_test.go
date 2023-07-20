@@ -179,6 +179,87 @@ func case3() {
 	}
 }
 
+func case5() {
+	condition := `
+{
+    "OpLogic": "AND",
+    "Conditions": [
+        {
+            "Operator": "==",
+            "Lhs": {
+                "VarExpr": "is_latest"
+            },
+            "Rhs": {
+                "MathExpr": {
+                    "OpMath": "==",
+                    "Lhs": {
+                        "Const": {
+                            "NumConst": 1.1232
+                        }
+                    },
+                    "Rhs": {
+                        "Const": {
+                            "NumConst": 1.1232
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}`
+	pass, err := JudgeConditionWithFactMeta(context.Background(), condition, `{"is_latest":true,"traffic_ahead": 0.59}`)
+	if err != nil {
+		// handle error here
+		// ...
+		println(err.Error())
+	}
+	if pass {
+		// your business code here
+		// ...
+		println("logic math condition passed!")
+	}
+}
+
+func case6() {
+	condition := `
+{
+    "OpLogic": "AND",
+    "Conditions": [
+        {
+            "Operator": "==",
+            "Lhs": {
+                "VarExpr": "is_latest"
+            },
+            "Rhs": {
+                "MathExpr": {
+                    "OpMath": "<",
+                    "Lhs": {
+                        "VarExpr": "traffic_ahead" 
+                    },
+                    "Rhs": {
+                        "Const": {
+                            "NumConst": 1.1232
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
+`
+	pass, err := JudgeConditionWithFactMeta(context.Background(), condition, `{"is_latest":true,"traffic_ahead": 0.59}`)
+	if err != nil {
+		// handle error here
+		// ...
+		println(err.Error())
+	}
+	if pass {
+		// your business code here
+		// ...
+		println("logic math traffic_ahead condition passed!")
+	}
+}
+
 func case4() {
 	condGroup := NewConditionsCondGroup(OpLogicAnd)
 	cond1 := NewCondition(operator.Equal)
@@ -213,4 +294,6 @@ func TestLWAPI(t *testing.T) {
 	case2()
 	case3()
 	case4()
+	case5()
+	case6()
 }

@@ -348,7 +348,7 @@ func (a *arishemRuleVisitor) VisitNullVar(ctx *parser.NullVarContext) interface{
 func (a *arishemRuleVisitor) VisitFullMath(ctx *parser.FullMathContext) interface{} {
 	const node = "VisitFullMath"
 	// get math operator
-	mathOp := ctx.OpMathPair().OpMathVal().MathOperator().GetText()
+	mathOp := ctx.LrOpMathPair().LrOpMathVal().LrMathOperator().GetText()
 	// get left value
 	lhsExpr := ctx.LhsPair().Expr()
 	rhsExpr := ctx.RhsPair().Expr()
@@ -365,6 +365,15 @@ func (a *arishemRuleVisitor) VisitFullMath(ctx *parser.FullMathContext) interfac
 		a.errorCallback(node, "math operator illegal, divide or mod zero is not allowed")
 		return nil
 	}
+	if mathOp == operator.Equal || mathOp == operator.NotEqual || mathOp == operator.Greater ||
+		mathOp == operator.Less || mathOp == operator.GreaterOrEqual || mathOp == operator.LessOrEqual {
+		b, err := operator.Judge(left, right, mathOp)
+		if err != nil {
+			a.errorCallback(node, "math logic calculate err=>"+err.Error())
+			return nil
+		}
+		return b
+	}
 	val, err := calculator.Calculate(fmt.Sprint(left) + mathOp + fmt.Sprint(right))
 	if err != nil {
 		a.errorCallback(node, "calculate math expression err=>"+err.Error())
@@ -376,7 +385,7 @@ func (a *arishemRuleVisitor) VisitFullMath(ctx *parser.FullMathContext) interfac
 func (a *arishemRuleVisitor) VisitListMath(ctx *parser.ListMathContext) interface{} {
 	const node = "VisitListMath"
 	// get math operator
-	mathOp := ctx.OpMathPair().OpMathVal().MathOperator().GetText()
+	mathOp := ctx.ListOpMathPair().ListOpMathVal().ListMathOperator().GetText()
 	// get left value
 	vals := a.Visit(ctx.Exprs())
 	if vals == nil {

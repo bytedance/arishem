@@ -49,18 +49,7 @@ func StringToNumber(numStr string) (num interface{}, err error) {
 	if strings.Contains(numStr, ".") || strings.ContainsAny(numStr, "eE") {
 		num, err = StringToFloat(numStr)
 	} else {
-		if numStr[0] == '-' {
-			num, err = strconv.ParseInt(numStr, 10, 64)
-		} else {
-			if numStr[0] == '+' {
-				if len(numStr) == 1 {
-					err = errors.New("number string only contains a positive sign")
-					return
-				}
-				numStr = numStr[1:]
-			}
-			num, err = strconv.ParseUint(numStr, 10, 64)
-		}
+		num, err = strconv.ParseInt(numStr, 10, 64)
 	}
 	return
 }

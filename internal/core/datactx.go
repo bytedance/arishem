@@ -21,7 +21,6 @@ import (
 	"errors"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
-	"github.com/bytedance/sonic"
 	"strings"
 	"sync"
 )
@@ -129,7 +128,9 @@ func (a *arishemDataCtx) PrefetchFeatures(feats []typedef.FeatureParam) {
 			}
 			meta, err := a.featureFetcher.FetchFeature(a.Context(), fwl.feat, a)
 			// store it into feature map
-			meta = a.storeFeatureMeta(fwl.feat, meta)
+			if err == nil {
+				a.storeFeatureMeta(fwl.feat, meta)
+			}
 			for _, obs := range a.featureFetcher.GetFetchObservers() {
 				obs.OnFeatureFetchEnd(a.Context(), fwl.feat.HashCode(), meta, err)
 			}
@@ -180,13 +181,17 @@ func (a *arishemDataCtx) GetFeatureValue(featParam typedef.FeatureParam, fieldPa
 	// fetch here
 	var feature typedef.MetaType
 	feature, err = a.featureFetcher.FetchFeature(a.Context(), featParam, a)
+	// store the data
+	if err == nil {
+		a.storeFeatureMeta(featParam, feature)
+	}
 
 	for _, obs := range a.featureFetcher.GetFetchObservers() {
 		obs.OnFeatureFetchEnd(a.Context(), featParam.HashCode(), feature, err)
 	}
-
-	// store the data
-	feature = a.storeFeatureMeta(featParam, feature)
+	if err != nil {
+		return nil, err
+	}
 	val, err = tools.MapIndexPaths(feature, fieldPaths)
 	return
 }
@@ -210,23 +215,13 @@ func (a *arishemDataCtx) GetExtra(key interface{}) (value interface{}) {
 	return
 }
 
-func (a *arishemDataCtx) storeFeatureMeta(fp typedef.FeatureParam, meta typedef.MetaType) (stored typedef.MetaType) {
-	if len(meta) <= 0 || fp == nil {
+func (a *arishemDataCtx) storeFeatureMeta(fp typedef.FeatureParam, meta typedef.MetaType) {
+	if fp == nil {
 		return
 	}
-	if d, ok := a.featMap.Load(fp.HashCode()); ok && d != nil {
+	if _, ok := a.featMap.Load(fp.HashCode()); ok {
 		return
 	}
-	m, err := sonic.MarshalString(meta)
-	if err != nil {
-		return
-	}
-	var mt map[string]interface{}
-	mt, err = tools.UnmarshalToMapUseInt64(m)
-	if err != nil {
-		return
-	}
-	a.featMap.Store(fp.HashCode(), &featMetaWithParam{param: fp.BuiltinParam(), meta: mt})
-	stored = mt
+	a.featMap.Store(fp.HashCode(), &featMetaWithParam{param: fp.BuiltinParam(), meta: meta})
 	return
 }

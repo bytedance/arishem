@@ -312,15 +312,31 @@ func (v *BasearishemVisitor) VisitOpMathKey(ctx *OpMathKeyContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BasearishemVisitor) VisitOpMathVal(ctx *OpMathValContext) interface{} {
+func (v *BasearishemVisitor) VisitLrOpMathVal(ctx *LrOpMathValContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BasearishemVisitor) VisitOpMathPair(ctx *OpMathPairContext) interface{} {
+func (v *BasearishemVisitor) VisitListOpMathVal(ctx *ListOpMathValContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BasearishemVisitor) VisitMathOperator(ctx *MathOperatorContext) interface{} {
+func (v *BasearishemVisitor) VisitLrOpMathPair(ctx *LrOpMathPairContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitListOpMathPair(ctx *ListOpMathPairContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitListMathOperator(ctx *ListMathOperatorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitLrMathOperator(ctx *LrMathOperatorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitLogicMathOperator(ctx *LogicMathOperatorContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -389,5 +405,9 @@ func (v *BasearishemVisitor) VisitNumConstKey(ctx *NumConstKeyContext) interface
 }
 
 func (v *BasearishemVisitor) VisitBoolConstKey(ctx *BoolConstKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitOperator(ctx *OperatorContext) interface{} {
 	return v.VisitChildren(ctx)
 }

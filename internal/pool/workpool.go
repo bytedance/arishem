@@ -96,7 +96,7 @@ func (wp *WorkPool) submitInternal(t *taskHolder) {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				logger.Errorf("panic in work pool, stack=>%s", r, debug.Stack())
+				logger.Errorf("panic in work pool, err=>%v, stack=>%s", r, debug.Stack())
 			}
 			atomic.AddInt32(&wp.size, -1)
 		}()

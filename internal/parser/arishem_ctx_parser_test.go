@@ -207,6 +207,21 @@ func TestParseArishemConditionContext(t *testing.T) {
 				assert.NotNil(t, err)
 				t.Log(err.Error())
 			},
+		}, {
+			"VALID: bool math operator by lrMath",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"==","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"!=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.NotNil(t, ctx)
+				assert.Nil(t, err)
+			},
+		}, {
+			"INVALID: bool math operator by ListMath",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">","ParamList":[{"Const":{"NumConst":100}},{"Const":{"NumConst":20}}]}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
+			},
 		},
 	}
 	for _, testCase := range testCases {
@@ -333,6 +348,22 @@ func TestParseArishemAimContext(t *testing.T) {
 			func(ctx IAimEntityContext, err error) {
 				assert.NotNil(t, ctx)
 				assert.Nil(t, err)
+			},
+		},
+		{
+			"VALID: bool math operator by lrMath",
+			`{"ListExpr":[{"MathExpr":{"OpMath":"==","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}},{"MathExpr":{"OpMath":"!=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}},{"MathExpr":{"OpMath":">","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}},{"MathExpr":{"OpMath":"<","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}},{"MathExpr":{"OpMath":">=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}},{"MathExpr":{"OpMath":"<=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}]}`,
+			func(ctx IAimEntityContext, err error) {
+				assert.NotNil(t, ctx)
+				assert.Nil(t, err)
+			},
+		}, {
+			"INVALID: bool math operator by ListMath",
+			`{"MathExpr":{"OpMath":">","ParamList":[{"Const":{"NumConst":100}},{"Const":{"NumConst":20}}]}}`,
+			func(ctx IAimEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
 			},
 		},
 	}

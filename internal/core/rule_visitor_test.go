@@ -212,6 +212,22 @@ func TestConditionVisit(t *testing.T) {
 				assert.True(t, pass)
 				assert.Empty(t, errMsg)
 			},
+		}, {
+			"CONDITION: [pass] logic math operator by LrMath",
+			`{"is_latest": true}`,
+			`{"OpLogic":"AND","Conditions":[{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"==","Lhs":{"Const":{"NumConst":1.1232}},"Rhs":{"Const":{"NumConst":1.1232}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"!=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<","Lhs":{"Const":{"NumConst":-1}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}}]}`,
+			func(pass bool, errMsg []string) {
+				assert.True(t, pass)
+				assert.Empty(t, errMsg)
+			},
+		}, {
+			"CONDITION: [not pass] logic math operator by LrMath",
+			`{"is_latest": true}`,
+			`{"OpLogic":"AND","Conditions":[{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"!=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"!=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<","Lhs":{"Const":{"NumConst":-1}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}}]}`,
+			func(pass bool, errMsg []string) {
+				assert.False(t, pass)
+				assert.Empty(t, errMsg)
+			},
 		},
 	}
 	for _, tc := range testCases {

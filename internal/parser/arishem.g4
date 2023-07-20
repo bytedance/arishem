@@ -68,9 +68,9 @@ variable
     ;
 
 math
-    :   L_BRACE opMathPair COMMA lhsPair COMMA rhsPair R_BRACE      #fullMath
-    |   L_BRACE opMathPair COMMA paramListKey COLON exprs R_BRACE   #listMath
-    |   NULL                                                        #nullMath
+    :   L_BRACE lrOpMathPair    COMMA lhsPair COMMA rhsPair R_BRACE      #fullMath
+    |   L_BRACE listOpMathPair  COMMA paramListKey COLON exprs R_BRACE   #listMath
+    |   NULL                                                             #nullMath
     ;
 
 function
@@ -148,15 +148,32 @@ opLogic
     |   NOT
     ;
 
-opMathKey   :   QUOTATION   'OpMath'    QUOTATION   ;
-opMathVal   :   QUOTATION   mathOperator     QUOTATION   ;
-opMathPair  :   opMathKey   COLON       opMathVal   ;
-mathOperator
+opMathKey       :   QUOTATION   'OpMath'    QUOTATION   ;
+lrOpMathVal     :   QUOTATION   lrMathOperator      QUOTATION   ;
+listOpMathVal   :   QUOTATION   listMathOperator    QUOTATION   ;
+lrOpMathPair    :   opMathKey   COLON       lrOpMathVal     ;
+listOpMathPair  :   opMathKey   COLON       listOpMathVal   ;
+
+listMathOperator
     :   PLUS
     |   SUB
     |   MUL
     |   DIV
     |   MOD
+    ;
+
+lrMathOperator
+    :   listMathOperator
+    |   logicMathOperator
+    ;
+
+logicMathOperator
+    :   EQUALS
+    |   NOT_EQUALS
+    |   GT
+    |   GTE
+    |   LT
+    |   LTE
     ;
 
 funcNameKey     :   QUOTATION   'FuncName'  QUOTATION   ;
@@ -165,7 +182,7 @@ funcNamePair    :   funcNameKey COLON       nameKey     ;
 operatorKey     :   QUOTATION   'Operator'      QUOTATION   ;
 operatorVal     :   QUOTATION   operatorType    QUOTATION   ;
 operatorPair    :   operatorKey COLON           operatorVal ;
-operatorType    :   ('NOT ' | NOT)?   OPERATOR              ;
+operatorType    :   ('NOT ' | NOT)?   operator          ;
 
 lhsKey  :   QUOTATION   'Lhs'   QUOTATION   ;
 lhsPair :   lhsKey      COLON   expr        ;
@@ -224,7 +241,7 @@ OPERATOR_LOGIC_STR
     |   N O T
     ;
 
-OPERATOR
+operator
     :   EQUALS
     |   NOT_EQUALS
     |   GT

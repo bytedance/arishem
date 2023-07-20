@@ -71,7 +71,7 @@ func TestStringToNumber(t *testing.T) {
 			"1000",
 			func(num interface{}, err error) {
 				assert.Nil(t, err)
-				assert.IsType(t, uint64(1000), num)
+				assert.IsType(t, int64(1000), num)
 			},
 		},
 		{
@@ -85,7 +85,7 @@ func TestStringToNumber(t *testing.T) {
 			"0",
 			func(num interface{}, err error) {
 				assert.Nil(t, err)
-				assert.IsType(t, uint64(0), num)
+				assert.IsType(t, int64(0), num)
 			},
 		},
 		{

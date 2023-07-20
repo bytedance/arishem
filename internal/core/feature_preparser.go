@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/funcs"
+	"github.com/bytedance/arishem/internal/operator"
 	"github.com/bytedance/arishem/internal/parser"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
@@ -207,7 +208,7 @@ func (f *featurePreParserVisitor) VisitNullVar(ctx *parser.NullVarContext) inter
 func (f *featurePreParserVisitor) VisitFullMath(ctx *parser.FullMathContext) interface{} {
 	const node = "VisitFullMath"
 	// get math operator
-	mathOp := ctx.OpMathPair().OpMathVal().MathOperator().GetText()
+	mathOp := ctx.LrOpMathPair().LrOpMathVal().LrMathOperator().GetText()
 	// get left value
 	lhsExpr := ctx.LhsPair().Expr()
 	rhsExpr := ctx.RhsPair().Expr()
@@ -224,6 +225,15 @@ func (f *featurePreParserVisitor) VisitFullMath(ctx *parser.FullMathContext) int
 		f.errMsgs.Add(node + ":math operator illegal, divide or mod zero is not allowed")
 		return nil
 	}
+	if mathOp == operator.Equal || mathOp == operator.NotEqual || mathOp == operator.Greater ||
+		mathOp == operator.Less || mathOp == operator.GreaterOrEqual || mathOp == operator.LessOrEqual {
+		b, err := operator.Judge(left, right, mathOp)
+		if err != nil {
+			f.errMsgs.Add(node + "math logic calculate err=>" + err.Error())
+			return nil
+		}
+		return b
+	}
 
 	val, err := calculator.Calculate(fmt.Sprint(left) + mathOp + fmt.Sprint(right))
 	if err != nil {
@@ -236,7 +246,7 @@ func (f *featurePreParserVisitor) VisitFullMath(ctx *parser.FullMathContext) int
 func (f *featurePreParserVisitor) VisitListMath(ctx *parser.ListMathContext) interface{} {
 	const node = "VisitListMath"
 	// get math operator
-	mathOp := ctx.OpMathPair().OpMathVal().MathOperator().GetText()
+	mathOp := ctx.ListOpMathPair().ListOpMathVal().ListMathOperator().GetText()
 	// get left value
 	vals := f.Visit(ctx.Exprs())
 	if vals == nil {
