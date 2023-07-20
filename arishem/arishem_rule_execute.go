@@ -163,7 +163,7 @@ func executeNoPriorityRules(noPriRules []RuleTarget, dc typedef.DataCtx, opts ..
 					}
 					aim := rv.VisitAim(r.AimPTree(), dc, r)
 					raceCheck.Lock()
-					rrs = append(rrs, &ruleResult{name: r.Identifier(), aim: aim})
+					rrs = append(rrs, &ruleResult{name: r.Identifier(), passed: pass, aim: aim})
 					raceCheck.Unlock()
 				}
 			}, rule)
