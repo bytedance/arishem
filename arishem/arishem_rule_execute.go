@@ -25,13 +25,13 @@ import (
 )
 
 // ExecuteSingleRule will execute a single rule, if condition pass, rr.Aim() will not be null.
-func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...core.ExecuteOption) (rr core.RuleResult) {
+func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rr core.RuleResult) {
 	if rule == nil || dc == nil {
 		return
 	}
 	if len(opts) > 0 {
 		// consume data context option
-		core.ApplyExecuteOptions(nil, dc, opts...)
+		ApplyExecuteOptions(nil, dc, opts...)
 	}
 	cdtFeats := rule.CondFeatParams()
 	if len(cdtFeats) > 0 {
@@ -45,7 +45,7 @@ func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...core.Ex
 	rv := core.NewArishemRuleVisitor()
 	if len(opts) > 0 {
 		// consume visit context option
-		core.ApplyExecuteOptions(rv, nil, opts...)
+		ApplyExecuteOptions(rv, nil, opts...)
 	}
 	r.passed = rv.VisitCondition(rule.ConditionPTree(), dc, rule)
 	if !r.passed {
@@ -62,7 +62,7 @@ func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...core.Ex
 }
 
 // ExecuteRules will execute all rule target, and returns rule results which passed by condition.
-func ExecuteRules(rules []core.RuleTarget, dc typedef.DataCtx, opts ...core.ExecuteOption) (rrs []core.RuleResult) {
+func ExecuteRules(rules []core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rrs []core.RuleResult) {
 	rulesSize := len(rules)
 	if rulesSize <= 0 || dc == nil {
 		return
@@ -98,7 +98,7 @@ func ExecuteRules(rules []core.RuleTarget, dc typedef.DataCtx, opts ...core.Exec
 	return
 }
 
-func executePriorityRules(priRules []core.RuleTarget, dc typedef.DataCtx, opts ...core.ExecuteOption) (rr core.RuleResult) {
+func executePriorityRules(priRules []core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rr core.RuleResult) {
 	if len(priRules) <= 0 {
 		return
 	}
@@ -106,10 +106,10 @@ func executePriorityRules(priRules []core.RuleTarget, dc typedef.DataCtx, opts .
 		return priRules[i].Compare(priRules[j]) < 0
 	})
 	// batch rules
-	batchedRules := batchRules(priRules, arishemConfiguration.Granularity(len(priRules), core.ExecuteModelPriority))
+	batchedRules := batchRules(priRules, arishemConfiguration.Granularity(len(priRules), ExecuteModePriority))
 	// create visitor
 	rv := core.NewArishemRuleVisitor()
-	core.ApplyExecuteOptions(rv, dc, opts...)
+	ApplyExecuteOptions(rv, dc, opts...)
 outer:
 	for idx, rules := range batchedRules {
 		featParams := groupedConditionPreFetchFeatures(idx, batchedRules)
@@ -134,13 +134,13 @@ outer:
 	return
 }
 
-func executeNoPriorityRules(noPriRules []core.RuleTarget, dc typedef.DataCtx, opts ...core.ExecuteOption) (rrs []core.RuleResult) {
+func executeNoPriorityRules(noPriRules []core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rrs []core.RuleResult) {
 	if len(noPriRules) <= 0 {
 		return
 	}
 	// batch no priority rules
-	batchedRules := batchRules(noPriRules, arishemConfiguration.Granularity(len(noPriRules), core.ExecuteModelNoPriority))
-	core.ApplyExecuteOptions(nil, dc, opts...)
+	batchedRules := batchRules(noPriRules, arishemConfiguration.Granularity(len(noPriRules), ExecuteModeNoPriority))
+	ApplyExecuteOptions(nil, dc, opts...)
 	raceCheck := sync.Mutex{}
 	for idx, rules := range batchedRules {
 		wg := sync.WaitGroup{}
@@ -155,7 +155,7 @@ func executeNoPriorityRules(noPriRules []core.RuleTarget, dc typedef.DataCtx, op
 				r := rI.(core.RuleTarget)
 
 				rv := core.NewArishemRuleVisitor()
-				core.ApplyExecuteOptions(rv, nil, opts...)
+				ApplyExecuteOptions(rv, nil, opts...)
 				pass := rv.VisitCondition(r.ConditionPTree(), dc, r)
 				if pass {
 					if len(rule.AimFeatParams()) > 0 {
