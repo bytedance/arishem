@@ -55,8 +55,10 @@ PASS
 
 ## 快速开始
 
+由于arishem在1.0.6之前的版本存在internal包的导出依赖问题，请使用1.0.6及以上版本
+
 ```shell
-go get github.com/bytedance/arishem
+go get github.com/bytedance/arishem@{version}
 ```
 
 在使用前必须先调用Initialize方法，否则执行将导致arishem执行异常，一般情况下使用default配置即可，该操作应当在你的init方法中进行。
