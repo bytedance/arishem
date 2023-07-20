@@ -18,7 +18,6 @@ package arishem
 
 import (
 	"context"
-	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/internal/funcs"
 	"github.com/bytedance/arishem/typedef"
 )
@@ -38,14 +37,14 @@ type ListParamFnPair struct {
 	Fn   func(ctx context.Context, params []interface{}) (interface{}, error)
 }
 
-func WithFeatureFetcherFactory(factory func() typedef.FeatureFetcher) core.Option {
-	return func(cfg *core.Configuration) {
+func WithFeatureFetcherFactory(factory func() typedef.FeatureFetcher) Option {
+	return func(cfg *Configuration) {
 		cfg.FeatFetcherFactory = factory
 	}
 }
 
 // WithVisitObserver can add visit observers to rule visitor.
-func WithVisitObserver(obs ...typedef.VisitObserver) core.ExecuteOption {
+func WithVisitObserver(obs ...typedef.VisitObserver) ExecuteOption {
 	return func(rv typedef.RuleVisitor, dc typedef.DataCtx) {
 		if rv != nil {
 			rv.AddVisitObserver(obs...)
@@ -54,7 +53,7 @@ func WithVisitObserver(obs ...typedef.VisitObserver) core.ExecuteOption {
 }
 
 // WithFeatureFetchObserver can add feature fetch observers to feature fetcher.
-func WithFeatureFetchObserver(obs ...typedef.FeatureFetchObserver) core.ExecuteOption {
+func WithFeatureFetchObserver(obs ...typedef.FeatureFetchObserver) ExecuteOption {
 	return func(rv typedef.RuleVisitor, dc typedef.DataCtx) {
 		if dc != nil && dc.FetcherFetcher() != nil {
 			dc.FetcherFetcher().AddFetchObserver(obs...)
@@ -62,24 +61,24 @@ func WithFeatureFetchObserver(obs ...typedef.FeatureFetchObserver) core.ExecuteO
 	}
 }
 
-func WithCustomNoParamFuncs(funcPairs ...NoParamFnPair) core.Option {
-	return func(cfg *core.Configuration) {
+func WithCustomNoParamFuncs(funcPairs ...NoParamFnPair) Option {
+	return func(cfg *Configuration) {
 		for _, pair := range funcPairs {
 			funcs.RegNoPramFunc(pair.Name, pair.Fn)
 		}
 	}
 }
 
-func WithCustomMapParamFuncs(funcPairs ...MapParamFnPair) core.Option {
-	return func(cfg *core.Configuration) {
+func WithCustomMapParamFuncs(funcPairs ...MapParamFnPair) Option {
+	return func(cfg *Configuration) {
 		for _, pair := range funcPairs {
 			funcs.RegMapParamFunc(pair.Name, pair.Fn)
 		}
 	}
 }
 
-func WithCustomListParamFuncs(funcPairs ...ListParamFnPair) core.Option {
-	return func(cfg *core.Configuration) {
+func WithCustomListParamFuncs(funcPairs ...ListParamFnPair) Option {
+	return func(cfg *Configuration) {
 		for _, pair := range funcPairs {
 			funcs.RegListParamFunc(pair.Name, pair.Fn)
 		}

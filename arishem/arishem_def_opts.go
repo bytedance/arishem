@@ -18,7 +18,6 @@ package arishem
 
 import (
 	"context"
-	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/internal/pool"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
@@ -39,20 +38,20 @@ var (
 	factor               = int(math.Pow(float64(dCpu*4), 0.5))
 )
 
-func WithDefMaxParallels() core.Option {
-	return func(cfg *core.Configuration) {
+func WithDefMaxParallels() Option {
+	return func(cfg *Configuration) {
 		cfg.MaxParallel = 10 * (1 << 12)
 	}
 }
 
-func WithDefGranularity() core.Option {
-	return func(cfg *core.Configuration) {
+func WithDefGranularity() Option {
+	return func(cfg *Configuration) {
 		cfg.Granularity = granularity
 	}
 }
 
-func WithDefTreeCache() core.Option {
-	return func(cfg *core.Configuration) {
+func WithDefTreeCache() Option {
+	return func(cfg *Configuration) {
 		c, _ := ristretto.NewCache(&ristretto.Config{
 			NumCounters:        10 * defTreeSz,
 			MaxCost:            defTreeSz,
@@ -65,28 +64,28 @@ func WithDefTreeCache() core.Option {
 	}
 }
 
-func WithDefFeatureFetchPool() core.Option {
-	return func(cfg *core.Configuration) {
+func WithDefFeatureFetchPool() Option {
+	return func(cfg *Configuration) {
 		cfg.FeatureFetchPool = pool.NewWorkPool(defIOPoolSz, defIOWaitTime)
 	}
 }
 
-func WithDefRuleComputePool() core.Option {
-	return func(cfg *core.Configuration) {
+func WithDefRuleComputePool() Option {
+	return func(cfg *Configuration) {
 		cfg.RuleComputePool = pool.NewWorkPool(defCmpPoolSz, defCmpWaitTime)
 	}
 }
 
-func WithDefFeatFetcherFactory() core.Option {
-	return func(cfg *core.Configuration) {
+func WithDefFeatFetcherFactory() Option {
+	return func(cfg *Configuration) {
 		cfg.FeatFetcherFactory = func() typedef.FeatureFetcher {
 			return &defaultFeatureFeature{}
 		}
 	}
 }
 
-func WithDefFeatVisitCache() core.Option {
-	return func(cfg *core.Configuration) {
+func WithDefFeatVisitCache() Option {
+	return func(cfg *Configuration) {
 		c, _ := ristretto.NewCache(&ristretto.Config{
 			NumCounters:        10 * defTreeSz,
 			MaxCost:            defTreeSz,
@@ -128,7 +127,7 @@ type defaultTreeCache struct {
 	storage *ristretto.Cache
 }
 
-func (d *defaultTreeCache) Put(expr string, tc *core.RuleTree) {
+func (d *defaultTreeCache) Put(expr string, tc *RuleTree) {
 	expr = strings.TrimSpace(expr)
 	if expr == "" || tools.IsNil(tc) {
 		return
@@ -136,7 +135,7 @@ func (d *defaultTreeCache) Put(expr string, tc *core.RuleTree) {
 	d.storage.Set(expr, tc, 1)
 }
 
-func (d *defaultTreeCache) Get(expr string) (tc *core.RuleTree, ok bool) {
+func (d *defaultTreeCache) Get(expr string) (tc *RuleTree, ok bool) {
 	expr = strings.TrimSpace(expr)
 	if expr == "" {
 		return
@@ -144,13 +143,13 @@ func (d *defaultTreeCache) Get(expr string) (tc *core.RuleTree, ok bool) {
 	var out interface{}
 	out, ok = d.storage.Get(expr)
 	if ok && out != nil {
-		tc, ok = out.(*core.RuleTree)
+		tc, ok = out.(*RuleTree)
 	}
 	return
 }
 
-func granularity(ruleGroupSize int, model core.ExecuteModel) int {
-	if model == core.ExecuteModelNoPriority {
+func granularity(ruleGroupSize int, model ExecuteMode) int {
+	if model == ExecuteModeNoPriority {
 		if ruleGroupSize <= arishemConfiguration.MaxParallel {
 			return ruleGroupSize
 		}

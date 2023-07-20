@@ -19,7 +19,6 @@ package core
 import (
 	"context"
 	"errors"
-	"github.com/bytedance/arishem/internal/pool"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/sonic"
@@ -29,11 +28,11 @@ import (
 
 var (
 	emptyParamMap typedef.MetaType = make(map[string]interface{})
-	featFetchPool *pool.WorkPool
+	featFetchPool typedef.ConcurrentPool
 	featFPOnce    = &sync.Once{}
 )
 
-func SetFeatureFetchPool(p *pool.WorkPool) {
+func SetFeatureFetchPool(p typedef.ConcurrentPool) {
 	if p == nil {
 		panic(errors.New("feature fetch pool is nil"))
 	}
