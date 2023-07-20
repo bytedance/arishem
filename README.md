@@ -55,7 +55,7 @@ PASS
 
 ## 快速开始
 
-由于arishem在1.0.6之前的版本存在internal包的导出依赖问题，请使用1.0.6及以上版本
+由于arishem在1.0.7之前的版本存在internal包的导出依赖问题，请使用1.0.7及以上版本
 
 ```shell
 go get github.com/bytedance/arishem@{version}
