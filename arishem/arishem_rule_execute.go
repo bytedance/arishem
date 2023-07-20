@@ -25,7 +25,7 @@ import (
 )
 
 // ExecuteSingleRule will execute a single rule, if condition pass, rr.Aim() will not be null.
-func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rr core.RuleResult) {
+func ExecuteSingleRule(rule RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rr RuleResult) {
 	if rule == nil || dc == nil {
 		return
 	}
@@ -62,7 +62,7 @@ func ExecuteSingleRule(rule core.RuleTarget, dc typedef.DataCtx, opts ...Execute
 }
 
 // ExecuteRules will execute all rule target, and returns rule results which passed by condition.
-func ExecuteRules(rules []core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rrs []core.RuleResult) {
+func ExecuteRules(rules []RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rrs []RuleResult) {
 	rulesSize := len(rules)
 	if rulesSize <= 0 || dc == nil {
 		return
@@ -70,8 +70,8 @@ func ExecuteRules(rules []core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOp
 	// distribute different rules
 	wg := sync.WaitGroup{}
 	priRules, noPriRules := distributeRules(rules)
-	var priRR core.RuleResult
-	var noPriRR []core.RuleResult
+	var priRR RuleResult
+	var noPriRR []RuleResult
 	if len(priRules) > 0 {
 		wg.Add(1)
 		arishemConfiguration.RuleComputePool.Submit(func(param interface{}) {
@@ -98,7 +98,7 @@ func ExecuteRules(rules []core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOp
 	return
 }
 
-func executePriorityRules(priRules []core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rr core.RuleResult) {
+func executePriorityRules(priRules []RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rr RuleResult) {
 	if len(priRules) <= 0 {
 		return
 	}
@@ -134,7 +134,7 @@ outer:
 	return
 }
 
-func executeNoPriorityRules(noPriRules []core.RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rrs []core.RuleResult) {
+func executeNoPriorityRules(noPriRules []RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption) (rrs []RuleResult) {
 	if len(noPriRules) <= 0 {
 		return
 	}
@@ -152,7 +152,7 @@ func executeNoPriorityRules(noPriRules []core.RuleTarget, dc typedef.DataCtx, op
 			wg.Add(1)
 			arishemConfiguration.RuleComputePool.Submit(func(rI interface{}) {
 				defer wg.Done()
-				r := rI.(core.RuleTarget)
+				r := rI.(RuleTarget)
 
 				rv := core.NewArishemRuleVisitor()
 				ApplyExecuteOptions(rv, nil, opts...)
@@ -173,7 +173,7 @@ func executeNoPriorityRules(noPriRules []core.RuleTarget, dc typedef.DataCtx, op
 	return
 }
 
-func groupedConditionPreFetchFeatures(currIdx int, batchedRules [][]core.RuleTarget) (featParams []typedef.FeatureParam) {
+func groupedConditionPreFetchFeatures(currIdx int, batchedRules [][]RuleTarget) (featParams []typedef.FeatureParam) {
 	if len(batchedRules) <= 0 {
 		return
 	}
@@ -197,7 +197,7 @@ func groupedConditionPreFetchFeatures(currIdx int, batchedRules [][]core.RuleTar
 	return
 }
 
-func distributeRules(rules []core.RuleTarget) (priority []core.RuleTarget, noPriority []core.RuleTarget) {
+func distributeRules(rules []RuleTarget) (priority []RuleTarget, noPriority []RuleTarget) {
 	if len(rules) <= 0 {
 		return
 	}
@@ -215,11 +215,11 @@ func distributeRules(rules []core.RuleTarget) (priority []core.RuleTarget, noPri
 	return
 }
 
-func batchRules(rules []core.RuleTarget, batchSize int) [][]core.RuleTarget {
+func batchRules(rules []RuleTarget, batchSize int) [][]RuleTarget {
 	if len(rules) < 0 || batchSize <= 0 {
-		return [][]core.RuleTarget{rules}
+		return [][]RuleTarget{rules}
 	}
-	var batches [][]core.RuleTarget
+	var batches [][]RuleTarget
 	for batchSize < len(rules) {
 		rules, batches = rules[batchSize:], append(batches, rules[0:batchSize:batchSize])
 	}

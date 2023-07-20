@@ -85,8 +85,8 @@ func (m *MyFeatureFetcher) FetchFeature(ctx context.Context, feat typedef.Featur
 	return nil, nil
 }
 
-func buildFeaturesArishemRules() []core.RuleTarget {
-	var rt []core.RuleTarget
+func buildFeaturesArishemRules() []RuleTarget {
+	var rt []RuleTarget
 	pr, err := NewPriorityRule("p-rule3", 3, `{
     "OpLogic": "&&",
     "Conditions": [
