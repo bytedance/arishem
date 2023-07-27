@@ -92,9 +92,7 @@ func ExecuteRules(rules []RuleTarget, dc typedef.DataCtx, opts ...ExecuteOption)
 	if priRR != nil {
 		rrs = append(rrs, priRR)
 	}
-	for _, rr := range noPriRR {
-		rrs = append(rrs, rr)
-	}
+	rrs = append(rrs, noPriRR...)
 	return
 }
 

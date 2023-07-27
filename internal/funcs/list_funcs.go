@@ -204,9 +204,7 @@ func ListAdd(ctx context.Context, params []interface{}) (interface{}, error) {
 		if err != nil {
 			continue
 		}
-		for _, ele := range list {
-			elements = append(elements, ele)
-		}
+		elements = append(elements, list...)
 	}
 	return elements, nil
 }
