@@ -105,7 +105,7 @@ func SliceFilterUint64(arr []uint64, filter []uint64) []uint64 {
 }
 
 func BatchSliceUint64(arr []uint64, batchSize int) [][]uint64 {
-	if len(arr) < 0 || batchSize <= 0 {
+	if len(arr) <= 0 || batchSize <= 0 {
 		return [][]uint64{arr}
 	}
 	var batches [][]uint64
@@ -118,7 +118,7 @@ func BatchSliceUint64(arr []uint64, batchSize int) [][]uint64 {
 }
 
 func BatchSliceInt64(arr []int64, batchSize int) [][]int64 {
-	if len(arr) < 0 || batchSize <= 0 {
+	if len(arr) <= 0 || batchSize <= 0 {
 		return [][]int64{arr}
 	}
 	var batches [][]int64
