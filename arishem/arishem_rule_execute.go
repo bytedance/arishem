@@ -214,7 +214,7 @@ func distributeRules(rules []RuleTarget) (priority []RuleTarget, noPriority []Ru
 }
 
 func batchRules(rules []RuleTarget, batchSize int) [][]RuleTarget {
-	if len(rules) < 0 || batchSize <= 0 {
+	if len(rules) <= 0 || batchSize <= 0 {
 		return [][]RuleTarget{rules}
 	}
 	var batches [][]RuleTarget
