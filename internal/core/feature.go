@@ -51,9 +51,9 @@ func DecodeFeatureHash(featureHash string) (featureName string, builtinParamHash
 }
 
 func GenBuiltinParamHash(builtinParam typedef.MetaType) string {
-	builtinParamStr := emptyParamMapHash
+	builtinParamStr := ""
 	if !tools.IsNil(builtinParam) {
-		builtinParamStr, _ = sonic.MarshalString(builtinParamStr)
+		builtinParamStr, _ = sonic.MarshalString(builtinParam)
 		if builtinParamStr == "" {
 			return emptyParamMapHash
 		}
