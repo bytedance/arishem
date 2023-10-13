@@ -522,7 +522,7 @@ func (a *arishemRuleVisitor) VisitNumConst(ctx *parser.NumConstContext) interfac
 }
 
 func (a *arishemRuleVisitor) VisitStrConst(ctx *parser.StrConstContext) interface{} {
-	return StrippingQuotation(ctx.StringType().GetText())
+	return tools.UnescapeString(StrippingQuotation(ctx.StringType().GetText()))
 }
 
 func (a *arishemRuleVisitor) VisitBoolConst(ctx *parser.BoolConstContext) interface{} {
