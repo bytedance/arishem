@@ -24,6 +24,8 @@ import (
 	"unsafe"
 )
 
+var unescaper = strings.NewReplacer(`\,`, `,`, `\"`, `"`, `\ `, ` `, `\=`, `=`)
+
 // StrToBytes by using point operation, not value copy.
 func StrToBytes(s string) []byte {
 	x := (*[2]uintptr)(unsafe.Pointer(&s))
@@ -125,4 +127,12 @@ func TruncateBytes(text []byte, maxSiz int, suffix []byte) ([]byte, bool) {
 	copy(buf, text[:maxSiz])
 	copy(buf[maxSiz:], suffix)
 	return buf, true
+}
+
+// UnescapeString returns unescaped version of in.
+func UnescapeString(in string) string {
+	if strings.IndexByte(in, '\\') == -1 { // has no '\'
+		return in
+	}
+	return unescaper.Replace(in)
 }
