@@ -19,12 +19,17 @@ package funcs
 import (
 	"context"
 	"fmt"
-	uuid "github.com/satori/go.uuid"
+
+	"github.com/google/uuid"
 	"strings"
 )
 
 func RandomUUID(ctx context.Context) (interface{}, error) {
-	return uuid.NewV4().String(), nil
+	nUUID, err := uuid.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+	return nUUID.String(), nil
 }
 
 func RandomUUIDWithReplacer(ctx context.Context, params map[string]interface{}) (interface{}, error) {
@@ -38,7 +43,11 @@ func RandomUUIDWithReplacer(ctx context.Context, params map[string]interface{}) 
 		repHyphen = true
 		replacer = fmt.Sprint(repHyI)
 	}
-	u := uuid.NewV4().String()
+	nUUID, err := uuid.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+	u := nUUID.String()
 	if repHyphen && replacer != "-" {
 		u = strings.ReplaceAll(u, "-", replacer)
 	}
