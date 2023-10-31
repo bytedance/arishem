@@ -116,7 +116,7 @@ func buildFeaturesArishemRules() []RuleTarget {
     "OpLogic": "&&",
     "Conditions": [
         {
-            "Operator": ">",
+            "Operator": "==",
             "Lhs": {
                 "FeatureExpr": {
                     "FeaturePath": "user.name"
@@ -124,7 +124,7 @@ func buildFeaturesArishemRules() []RuleTarget {
             },
             "Rhs": {
                 "Const": {
-                    "StrConst": "Jack"
+                    "StrConst": "Jane"
                 }
             }
         }
