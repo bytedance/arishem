@@ -119,10 +119,10 @@ func (a *arishemRuleVisitor) Visit(tree antlr.ParseTree) interface{} {
 	// cache expression
 	case parser.IExprContext:
 		// try get from cache
-		exprVal, ok := a.dataCtx.Get(t.GetAltNumber())
+		exprVal, ok := a.dataCtx.Get(t.GetText())
 		if !ok {
 			exprVal = tree.Accept(a)
-			a.dataCtx.Set(t.GetAltNumber(), exprVal)
+			a.dataCtx.Set(t.GetText(), exprVal)
 		} /*else {
 			// remove debug log
 			//logger.Infof("cache hit in visit!!! text=>%s", tree.GetText())
@@ -202,7 +202,7 @@ func (a *arishemRuleVisitor) VisitNullConditionGroup(ctx *parser.NullConditionGr
 
 func (a *arishemRuleVisitor) VisitFullCondition(ctx *parser.FullConditionContext) interface{} {
 	// try finding cache in DataCtx
-	if cdtCacheI, ok := a.dataCtx.Get(ctx.GetAltNumber()); ok {
+	if cdtCacheI, ok := a.dataCtx.Get(ctx.GetText()); ok {
 		var cdtCc typedef.JudgeNode
 		if cdtC, convO := cdtCacheI.(typedef.JudgeNode); convO {
 			cdtCc = cdtC
@@ -226,7 +226,7 @@ func (a *arishemRuleVisitor) VisitFullCondition(ctx *parser.FullConditionContext
 	pass, err := operator.Judge(left, right, opr)
 	// put it into cache
 	cdtInfo := newArishemCondition(pass, left, lhsExpr.GetText(), right, rhsExpr.GetText(), opr, err)
-	a.dataCtx.Set(ctx.GetAltNumber(), cdtInfo)
+	a.dataCtx.Set(ctx.GetText(), cdtInfo)
 	// observers call back
 	for _, obsr := range a.observers {
 		obsr.OnJudgeNodeVisitEnd(a.dataCtx.Context(), cdtInfo, a.visitTarget)

@@ -20,34 +20,34 @@ import (
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 )
 
-//ArishemParserRuleContext implement GET/SET altNum function and cache the text.
+// ArishemParserRuleContext implement GET/SET altNum function and cache the text.
 type ArishemParserRuleContext struct {
 	*antlr.BaseParserRuleContext
-	altNum int
-	text   string
+	//altNum int
+	text string
 }
 
 func NewArishemParserRuleContext(parent antlr.ParserRuleContext, invokingState int) *ArishemParserRuleContext {
 	cp := &ArishemParserRuleContext{
 		BaseParserRuleContext: antlr.NewBaseParserRuleContext(parent, invokingState),
-		altNum:                antlr.ATNInvalidAltNumber,
+		//altNum:                antlr.ATNInvalidAltNumber,
 	}
 	cp.SetParent(parent)
 	cp.SetInvokingState(invokingState)
 	return cp
 }
 
-//GetAltNumber get the alternative number of context.
-func (c *ArishemParserRuleContext) GetAltNumber() int {
-	return c.altNum
-}
+// GetAltNumber get the alternative number of context.
+//func (c *ArishemParserRuleContext) GetAltNumber() int {
+//	return c.altNum
+//}
 
-//SetAltNumber set the alternative number of context.
-func (c *ArishemParserRuleContext) SetAltNumber(altNumber int) {
-	c.altNum = altNumber
-}
+// SetAltNumber set the alternative number of context.
+//func (c *ArishemParserRuleContext) SetAltNumber(altNumber int) {
+//	c.altNum = altNumber
+//}
 
-//GetText original use DFS to generate text without cache storage, here to store it in first invoking.
+// GetText original use DFS to generate text without cache storage, here to store it in first invoking.
 func (c *ArishemParserRuleContext) GetText() string {
 	if len(c.text) <= 0 {
 		c.text = c.BaseParserRuleContext.GetText()

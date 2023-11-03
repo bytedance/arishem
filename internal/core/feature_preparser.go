@@ -114,9 +114,9 @@ func (f *featurePreParserVisitor) Visit(tree antlr.ParseTree) interface{} {
 	var key, cache interface{}
 	var ok bool
 	switch t := tree.(type) {
-	case antlr.RuleContext:
-		key = t.GetAltNumber()
-		cache, ok = featVisitCache.Get(key)
+	//case antlr.RuleContext:
+	//	key = t.GetText()
+	//	cache, ok = featVisitCache.Get(key)
 	default:
 		key = t.GetText()
 		cache, ok = featVisitCache.Get(key)
