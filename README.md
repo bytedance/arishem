@@ -55,7 +55,7 @@ PASS
 
 ## 快速开始
 
-注意：目前可使用的版本是 v1.0.0-rc1和v1.0.0-rc2，其他版本的存在包可见性问题，建议使用v1.0.0-rc2版本
+请使用v1.0.9及以上版本
 ```shell
 go get github.com/bytedance/arishem@{version}
 ```
