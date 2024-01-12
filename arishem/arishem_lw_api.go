@@ -19,6 +19,7 @@ package arishem
 import (
 	"context"
 	"errors"
+	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/core"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
@@ -41,28 +42,62 @@ func DataContext(ctx context.Context, json string) (dc typedef.DataCtx, err erro
 
 // ParseCondition will parse a condition string and return the rule tree with feature parameter pre-parsed.
 func ParseCondition(condition string) (tree *RuleTree, err error) {
-	condition = strings.TrimSpace(condition)
-	if condition == "" {
-		err = errors.New("empty cond text")
+	return ParseRuleTree(condition, ExprTypeCondition)
+}
+
+// ParseAim will parse an aim string and return the rule tree with feature parameter pre-parsed.
+func ParseAim(aim string) (tree *RuleTree, err error) {
+	return ParseRuleTree(aim, ExprTypeAim)
+}
+
+// ParseRuleTree will try parsing expr to antlr parse tree, err will not be null when failed.
+func ParseRuleTree(expr string, exprType ExprType) (exprTree *RuleTree, err error) {
+	expr = strings.TrimSpace(expr)
+	if expr == "" {
+		err = errors.New("empty expression")
 		return
 	}
-	condition, err = tools.Compat(condition)
+	expr, err = tools.Compat(expr)
 	if err != nil {
 		return
 	}
 	var ok bool
-	tree, ok = arishemConfiguration.TCache.Get(condition)
-	if ok && tree != nil {
+	exprTree, ok = arishemConfiguration.TCache.Get(expr)
+	if ok && exprTree != nil {
 		return
 	}
-	tree, err = parseRuleTree(condition, exprTypeCondition)
+	exprTree, err = parseRuleTree(expr, exprType)
 	if err != nil {
 		return
 	}
-	if tree.Tree == nil {
+	if exprTree.Tree == nil {
 		err = errors.New("tree parsed is null")
 		return
 	}
+	return
+}
+
+// WalkAim will try to parse the aimExpr into the antlr parse tree and visit it to get the result, err will not be null when parse aim expression failed.
+func WalkAim(aimExpr string, dc typedef.DataCtx, opts ...ExecuteOption) (aim typedef.Aim, err error) {
+	var tree *RuleTree
+	tree, err = ParseAim(aimExpr)
+	if err != nil {
+		return
+	}
+	rv := core.NewArishemRuleVisitor()
+	ApplyExecuteOptions(rv, dc, opts...)
+	if len(tree.FeatParams) > 0 {
+		dc.PrefetchFeatures(tree.FeatParams)
+	}
+	aim = rv.VisitAim(tree.Tree, dc, &dummyVisitTarget{name: aimExpr})
+	return
+}
+
+// WalkAimTree will visit the aimTree to get the result
+func WalkAimTree(aimTree antlr.ParseTree, dc typedef.DataCtx, opts ...ExecuteOption) (aim typedef.Aim) {
+	rv := core.NewArishemRuleVisitor()
+	ApplyExecuteOptions(rv, dc, opts...)
+	aim = rv.VisitAim(aimTree, dc, &dummyVisitTarget{name: aimTree.GetText()})
 	return
 }
 

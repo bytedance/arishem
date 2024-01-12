@@ -45,11 +45,11 @@ type RuleResult interface {
 	Aim() typedef.Aim
 }
 
-type exprType int
+type ExprType int
 
 const (
-	exprTypeCondition = iota
-	exprTypeAim
+	ExprTypeCondition = iota
+	ExprTypeAim
 )
 
 type ruleResult struct {
@@ -183,7 +183,7 @@ func tryParse(cdtExpr, aimExpr string) (cdtTree, aimTree *RuleTree, err error) {
 		wg.Add(1)
 		arishemConfiguration.RuleComputePool.Submit(func(interface{}) {
 			defer wg.Done()
-			cdtTree, cdtErr = parseRuleTree(cdtExpr, exprTypeCondition)
+			cdtTree, cdtErr = parseRuleTree(cdtExpr, ExprTypeCondition)
 		}, nil)
 	}
 
@@ -197,7 +197,7 @@ func tryParse(cdtExpr, aimExpr string) (cdtTree, aimTree *RuleTree, err error) {
 		wg.Add(1)
 		arishemConfiguration.RuleComputePool.Submit(func(interface{}) {
 			defer wg.Done()
-			aimTree, aimErr = parseRuleTree(aimExpr, exprTypeAim)
+			aimTree, aimErr = parseRuleTree(aimExpr, ExprTypeAim)
 		}, nil)
 	}
 	// wait for parsing
@@ -223,11 +223,11 @@ func tryParse(cdtExpr, aimExpr string) (cdtTree, aimTree *RuleTree, err error) {
 	return
 }
 
-func parseRuleTree(exprStr string, expT exprType) (exprTree *RuleTree, err error) {
+func parseRuleTree(exprStr string, expT ExprType) (exprTree *RuleTree, err error) {
 	fppl := core.NewFeaturePreParseListener()
 
 	var treeCtx antlr.ParseTree
-	if expT == exprTypeCondition {
+	if expT == ExprTypeCondition {
 		treeCtx, err = parser.ParseArishemCondition(exprStr, fppl)
 	} else {
 		treeCtx, err = parser.ParseArishemAim(exprStr, fppl)

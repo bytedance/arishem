@@ -297,3 +297,51 @@ func TestLWAPI(t *testing.T) {
 	case5()
 	case6()
 }
+
+func TestWalkAim(t *testing.T) {
+	testCases := []*struct {
+		aimExpr string
+		dcExpr  string
+		check   func(aim typedef.Aim, err error)
+	}{
+		{
+			`{
+    "Const": {
+        "StrConst": "p-rule3 passed!"
+    }
+}`,
+			`{}`,
+			func(aim typedef.Aim, err error) {
+				fmt.Printf("%v\n", aim.AsExpr())
+				assert.NotNil(t, aim)
+				assert.Nil(t, err)
+			},
+		},
+		{
+			`{"MathExpr":{"OpMath":">","ParamList":[{"Const":{"NumConst":100}},{"Const":{"NumConst":20}}]}}`,
+			`{}`,
+			func(aim typedef.Aim, err error) {
+				assert.Nil(t, aim)
+				assert.NotNil(t, err)
+				fmt.Printf("%v\n", err)
+			},
+		},
+		{
+			`{"MapExpr":{"UserName":{"VarExpr":"user.username"},"UserAge":{"MathExpr":{"OpMath":"+","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}},"UserWeight":{"MathExpr":{"OpMath":"+","ParamList":[{"Const":{"NumConst":100}},{"Const":{"NumConst":20}}]}},"UserPersonality":{"FeatureExpr":{"FeaturePath":"user_center.user_personality","BuiltinParam":{"user_id":{"VarExpr":"user.id"}}}}}}`,
+			`{}`,
+			func(aim typedef.Aim, err error) {
+				assert.Nil(t, err)
+				assert.NotNil(t, aim)
+				fmt.Printf("%v\n", aim.AsExpr())
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		dc, err := DataContext(context.Background(), testCase.dcExpr)
+		if err != nil {
+			testCase.check(nil, err)
+			continue
+		}
+		testCase.check(WalkAim(testCase.aimExpr, dc))
+	}
+}
