@@ -99,7 +99,7 @@ func (a *arishemRuleVisitor) VisitAim(aimCtx antlr.ParseTree, dCtx typedef.DataC
 	default:
 	}
 	if !flag {
-		a.errorCallback(node, "invalid condition context type")
+		a.errorCallback(node, "invalid aim context type")
 		return
 	}
 	// assignment data context and visit target
