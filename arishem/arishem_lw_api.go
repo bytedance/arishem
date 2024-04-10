@@ -73,6 +73,8 @@ func ParseRuleTree(expr string, exprType ExprType) (exprTree *RuleTree, err erro
 	if exprTree.Tree == nil {
 		err = errors.New("tree parsed is null")
 		return
+	} else {
+		arishemConfiguration.TCache.Put(expr, exprTree)
 	}
 	return
 }
