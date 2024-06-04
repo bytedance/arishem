@@ -17,17 +17,17 @@
 package arishem
 
 type Const struct {
-	BoolConst *bool    `json:"BoolConst,omitempty"`
-	NumConst  *float64 `json:"NumConst,omitempty"`
-	StrConst  *string  `json:"StrConst,omitempty"`
+	BoolConst *bool       `json:"BoolConst,omitempty"`
+	NumConst  interface{} `json:"NumConst,omitempty"`
+	StrConst  *string     `json:"StrConst,omitempty"`
 }
 
 func NewBoolConst(b bool) *Const {
 	return &Const{BoolConst: &b}
 }
 
-func NewNumConst(f float64) *Const {
-	return &Const{NumConst: &f}
+func NewNumConst(n interface{}) *Const {
+	return &Const{NumConst: n}
 }
 
 func NewStrConst(s string) *Const {
