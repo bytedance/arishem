@@ -21,6 +21,7 @@ import (
 	"github.com/bytedance/arishem/internal/operator"
 	"github.com/bytedance/arishem/internal/parser"
 	"github.com/stretchr/testify/assert"
+	"math"
 	"testing"
 )
 
@@ -28,12 +29,12 @@ func TestBuildCondition(t *testing.T) {
 	condGroup := NewConditionsCondGroup(OpLogicAnd)
 	cond1 := NewCondition(operator.Equal)
 	cond1.Lhs = NewConstExpr(NewNumConst(1.0))
-	cond1.Rhs = NewConstExpr(NewNumConst(1.0))
+	cond1.Rhs = NewConstExpr(NewNumConst(int64(math.MaxInt64)))
 	condGroup.AddConditions(cond1)
 	expr, err := condGroup.Build()
 	assert.Nil(t, err)
 	assert.NotEmpty(t, expr)
-	assert.Equal(t, `{"OpLogic":"&&","Conditions":[{"Operator":"==","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":1}}}]}`, expr)
+	assert.Equal(t, `{"OpLogic":"&&","Conditions":[{"Operator":"==","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":9223372036854775807}}}]}`, expr)
 
 	cond2 := NewCondition(operator.ListIn, NOT)
 	var varPath VarExpr = "user.user_list#2.name"
@@ -48,7 +49,7 @@ func TestBuildCondition(t *testing.T) {
 	expr, err = condGroup.Build()
 	assert.Nil(t, err)
 	assert.NotEmpty(t, expr)
-	assert.Equal(t, `{"OpLogic":"&&","Conditions":[{"Operator":"==","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"!LIST_IN","Lhs":{"VarExpr":"user.user_list#2.name"},"Rhs":{"ConstList":[{"StrConst":"Jack"},{"StrConst":"Jane"},{"StrConst":"John"},{"StrConst":"Ezreal"}]}}]}`, expr)
+	assert.Equal(t, `{"OpLogic":"&&","Conditions":[{"Operator":"==","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":9223372036854775807}}},{"Operator":"!LIST_IN","Lhs":{"VarExpr":"user.user_list#2.name"},"Rhs":{"ConstList":[{"StrConst":"Jack"},{"StrConst":"Jane"},{"StrConst":"John"},{"StrConst":"Ezreal"}]}}]}`, expr)
 
 	pass, err := JudgeConditionWithFactMeta(context.Background(), expr, `{"user":{"user_list":[{"name":"Aatrox"},{"name":"Ahri"},{"name":"Ezreal"},{"name":"MalPhite"}]}}`)
 	assert.Nil(t, err)
