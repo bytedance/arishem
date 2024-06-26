@@ -76,7 +76,7 @@ func TestUnixToDate(t *testing.T) {
 
 func TestGetCurrentYear(t *testing.T) {
 	year, _ := GetCurrentYear(context.Background())
-	assert.Equal(t, int64(2023), year)
+	assert.Equal(t, int64(2024), year)
 }
 
 /*func TestGetCurrentYearDay(t *testing.T) {

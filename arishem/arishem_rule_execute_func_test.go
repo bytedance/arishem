@@ -35,7 +35,7 @@ func TestFuncExprNoParam(t *testing.T) {
             },
             "Rhs": {
                 "Const": {
-                    "NumConst": 2023
+                    "NumConst": 2024
                 }
             }
         }
