@@ -77,6 +77,9 @@ type arishemVisitor interface {
 	// Visit a parse tree produced by arishemParser#featureExprType.
 	VisitFeatureExprType(ctx *FeatureExprTypeContext) interface{}
 
+	// Visit a parse tree produced by arishemParser#subCondExprType.
+	VisitSubCondExprType(ctx *SubCondExprTypeContext) interface{}
+
 	// Visit a parse tree produced by arishemParser#nullExprType.
 	VisitNullExprType(ctx *NullExprTypeContext) interface{}
 
@@ -115,6 +118,12 @@ type arishemVisitor interface {
 
 	// Visit a parse tree produced by arishemParser#nullFeature.
 	VisitNullFeature(ctx *NullFeatureContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#fullSubCond.
+	VisitFullSubCond(ctx *FullSubCondContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#nullSubCond.
+	VisitNullSubCond(ctx *NullSubCondContext) interface{}
 
 	// Visit a parse tree produced by arishemParser#numConst.
 	VisitNumConst(ctx *NumConstContext) interface{}
@@ -178,6 +187,12 @@ type arishemVisitor interface {
 
 	// Visit a parse tree produced by arishemParser#constListKey.
 	VisitConstListKey(ctx *ConstListKeyContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#subCondExprKey.
+	VisitSubCondExprKey(ctx *SubCondExprKeyContext) interface{}
+
+	// Visit a parse tree produced by arishemParser#condNameKey.
+	VisitCondNameKey(ctx *CondNameKeyContext) interface{}
 
 	// Visit a parse tree produced by arishemParser#varPath.
 	VisitVarPath(ctx *VarPathContext) interface{}
