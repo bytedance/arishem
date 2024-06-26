@@ -357,3 +357,55 @@ func TestExecuteRules(t *testing.T) {
 		}
 	}
 }
+
+func TestForeachWithSubCondition(t *testing.T) {
+	// case1-1 test OnlyPriceMatch, OnlyPriceMatch added when initialize the arishem
+	pass, err := JudgeConditionWithFactMeta(
+		context.Background(),
+		`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH SUB_COND and","Lhs":{"VarExpr":"item_info.item_list"},"Rhs":{"SubCondExpr":{"CondName":"OnlyPriceMatch"}}}]}`,
+		`{"item_info":{"item_list":[{"name":"name@1","price":100},{"name":"name@2","price":102.13},{"name":"name@3","price":200},{"name":"name@4","price":100},{"name":"name@5","price":101},{"name":"name@6","price":303.1234}]}}`,
+	)
+	assert.Nil(t, err)
+	assert.True(t, pass)
+	// case1-2 use rule execution while dependent on the sub condition
+	rule, err := NewNoPriorityRule(
+		"depend-OnlyPriceMatch",
+		`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH SUB_COND and","Lhs":{"VarExpr":"item_info.item_list"},"Rhs":{"SubCondExpr":{"CondName":"OnlyPriceMatch"}}}]}`,
+		`{
+    "Const": {
+        "StrConst": "depend-OnlyPriceMatch"
+    }
+}`)
+	assert.Nil(t, err)
+	dc, err := DataContext(context.Background(), `{"item_info":{"item_list":[{"name":"name@1","price":100},{"name":"name@2","price":102.13},{"name":"name@3","price":200},{"name":"name@4","price":100},{"name":"name@5","price":101},{"name":"name@6","price":303.1234}]}}`)
+	assert.Nil(t, err)
+	//rr := ExecuteSingleRule(rule, dc, WithVisitObserver(NewMyObserver("obs")))
+	rr := ExecuteSingleRule(rule, dc)
+	assert.NotNil(t, rr)
+	assert.True(t, rr.Passed())
+
+	// case2 test OnlyNameMatch, OnlyNameMatch added by create a rule
+	rule, err = NewNoPriorityRule("OnlyNameMatch", `{"OpLogic":"&&","Conditions":[{"Operator":"STRING_CONTAINS","Lhs":{"VarExpr":"name"},"Rhs":{"Const":{"StrConst":"name@"}}}]}`, `{
+		"Const": {
+			"StrConst": "OnlyNameMatch"
+		}
+	}`)
+	assert.Nil(t, err)
+	pass, err = JudgeConditionWithFactMeta(
+		context.Background(),
+		`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH SUB_COND and","Lhs":{"VarExpr":"item_info.item_list"},"Rhs":{"SubCondExpr":{"CondName":"OnlyNameMatch"}}}]}`,
+		`{"item_info":{"item_list":[{"name":"name@1","price":100},{"name":"name@2","price":102.13},{"name":"name@3","price":200},{"name":"name@4","price":100},{"name":"name@5","price":101},{"name":"name@6","price":303.1234}]}}`,
+	)
+	assert.Nil(t, err)
+	assert.True(t, pass)
+	// case3 test NameAndPriceMatch, NameAndPriceMatch added by AddSubCondition
+	err = AddSubCondition("NameAndPriceMatch", `{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"STRING_CONTAINS","Lhs":{"VarExpr":"name"},"Rhs":{"Const":{"StrConst":"name@"}}}]}`)
+	assert.Nil(t, err)
+	pass, err = JudgeConditionWithFactMeta(
+		context.Background(),
+		`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH SUB_COND and","Lhs":{"VarExpr":"item_info.item_list"},"Rhs":{"SubCondExpr":{"CondName":"NameAndPriceMatch"}}}]}`,
+		`{"item_info":{"item_list":[{"name":"name@1","price":100},{"name":"name@2","price":102.13},{"name":"name@3","price":200},{"name":"name@4","price":100},{"name":"name@5","price":101},{"name":"name@6","price":303.1234}]}}`,
+	)
+	assert.Nil(t, err)
+	assert.True(t, pass)
+}

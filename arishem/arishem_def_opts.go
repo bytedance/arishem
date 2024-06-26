@@ -18,6 +18,8 @@ package arishem
 
 import (
 	"context"
+	"errors"
+	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/pool"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
@@ -94,6 +96,57 @@ func WithDefFeatVisitCache() Option {
 		})
 		cfg.FeatVisitCache = &defaultFeatCache{c: c}
 	}
+}
+
+// WithEnableSubCondition will enable arishem using sub condition to judge a parent-condition which right hand type is SubCondExpr,
+// pairs allow users to add some default conditions when enable this feature
+// PAY ATTENTION: WithEnableSubCondition will panic if initialize invalid condition pair.
+func WithEnableSubCondition(pairs ...string) Option {
+	return func(cfg *Configuration) {
+		c, _ := ristretto.NewCache(&ristretto.Config{
+			NumCounters:        10 * defTreeSz,
+			MaxCost:            defTreeSz,
+			BufferItems:        64,
+			IgnoreInternalCost: true,
+		})
+		cfg.SubCond = &defaultSubConditionManage{
+			ExprDict: c,
+		}
+		err := AddSubCondition(pairs...)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func WithCustomSubConditionConfig(sc SubConditionManage) Option {
+	return func(cfg *Configuration) {
+		cfg.SubCond = sc
+	}
+}
+
+type defaultSubConditionManage struct {
+	ExprDict *ristretto.Cache
+}
+
+func (d *defaultSubConditionManage) WhenConditionParsed(condName, expr string, tree antlr.ParseTree) {
+	d.ExprDict.Set(condName, expr, 1)
+}
+
+func (d *defaultSubConditionManage) GetConditionTree(condName string) (antlr.ParseTree, error) {
+	expr, exist := d.ExprDict.Get(condName)
+	if !exist || expr == nil {
+		return nil, errors.New("expression not find by " + condName)
+	}
+	tree, err := ParseCondition(expr.(string))
+	if err != nil {
+		return nil, err
+	}
+	return tree.Tree, nil
+}
+
+func (d *defaultSubConditionManage) RuleIdentityMapAsCondName() bool {
+	return true
 }
 
 type defaultFeatureFeature struct{}

@@ -31,6 +31,7 @@ func init() {
 		WithCustomNoParamFuncs(NoParamFnPair{Name: "NPHello", Fn: MyCustomNoFuncHelloArishem}),
 		WithCustomMapParamFuncs(MapParamFnPair{Name: "MPHello", Fn: MyCustomMapFuncHelloArishem}),
 		WithCustomListParamFuncs(ListParamFnPair{Name: "LPHello", Fn: MyCustomListFuncHelloArishem}),
+		WithEnableSubCondition("OnlyPriceMatch", `{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}}]}`),
 	)
 }
 

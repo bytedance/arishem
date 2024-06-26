@@ -57,4 +57,6 @@ type RuleVisitor interface {
 	VisitCondition(cdtCtx antlr.ParseTree, dCtx DataCtx, vt VisitTarget) (pass bool)
 	// VisitAim will visit aim context and return aim value.
 	VisitAim(aimCtx antlr.ParseTree, dCtx DataCtx, vt VisitTarget) (aim Aim)
+
+	SetConditionFinder(cf func(condName string) (antlr.ParseTree, error))
 }

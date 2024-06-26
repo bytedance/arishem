@@ -17,6 +17,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/funcs"
@@ -29,20 +30,33 @@ import (
 	"strings"
 )
 
+type simpleVisitTarget struct {
+	name string
+}
+
+func (s *simpleVisitTarget) Identifier() string {
+	return s.name
+}
+
 type arishemRuleVisitor struct {
 	*parser.BasearishemVisitor
 	visitTarget typedef.VisitTarget
 	dataCtx     typedef.DataCtx
 	observers   map[string]typedef.VisitObserver
+	condFinder  func(string) (antlr.ParseTree, error)
 }
 
-func NewArishemRuleVisitor() typedef.RuleVisitor {
-	return &arishemRuleVisitor{
+func NewArishemRuleVisitor(condFinder func(string) (antlr.ParseTree, error)) typedef.RuleVisitor {
+	rv := &arishemRuleVisitor{
 		BasearishemVisitor: &parser.BasearishemVisitor{
 			BaseParseTreeVisitor: &antlr.BaseParseTreeVisitor{},
 		},
 		observers: make(map[string]typedef.VisitObserver, 1),
 	}
+	if condFinder != nil {
+		rv.condFinder = condFinder
+	}
+	return rv
 }
 
 func (a *arishemRuleVisitor) errorCallback(node, errMsg string) {
@@ -67,6 +81,10 @@ func (a *arishemRuleVisitor) GetVisitObservers() []typedef.VisitObserver {
 
 func (a *arishemRuleVisitor) ClearVisitObservers() {
 	a.observers = make(map[string]typedef.VisitObserver, 1)
+}
+
+func (a *arishemRuleVisitor) SetConditionFinder(cf func(string) (antlr.ParseTree, error)) {
+	a.condFinder = cf
 }
 
 // VisitCondition visit condition entity to determinate condition is passed
@@ -196,11 +214,12 @@ func (a *arishemRuleVisitor) VisitLeafConditionGroup(ctx *parser.LeafConditionGr
 	return pass
 }
 
-func (a *arishemRuleVisitor) VisitNullConditionGroup(ctx *parser.NullConditionGroupContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullConditionGroup(_ *parser.NullConditionGroupContext) interface{} {
 	return false
 }
 
 func (a *arishemRuleVisitor) VisitFullCondition(ctx *parser.FullConditionContext) interface{} {
+	const node = "VisitFullCondition"
 	// try finding cache in DataCtx
 	if cdtCacheI, ok := a.dataCtx.Get(ctx.GetAltNumber()); ok {
 		var cdtCc typedef.JudgeNode
@@ -222,8 +241,47 @@ func (a *arishemRuleVisitor) VisitFullCondition(ctx *parser.FullConditionContext
 	// visit left and right
 	left := a.Visit(lhsExpr)
 	right := a.Visit(rhsExpr)
-	// judge the condition by opr with left and right
-	pass, err := operator.Judge(left, right, opr)
+
+	pass := false
+	var err error
+
+	const foreachKey = "FOREACH"
+
+	if !strings.HasPrefix(opr, foreachKey) {
+		pass, err = evaluateLR(a, left, right, opr)
+	} else {
+		// execute the foreach operator
+		// check the left type whether array or not
+		var lArray []interface{}
+		lArray, err = tools.ConvToSliceUnifyType(left)
+		if err == nil {
+			// parse the operator, arishem grammar guarantee that here are at least two space
+			const space = " "
+			firstSpace := strings.Index(opr, space)
+			lastSpace := strings.LastIndex(opr, space)
+			foreachOpr := opr[firstSpace+1 : lastSpace]
+			if strings.HasPrefix(foreachOpr, foreachKey) {
+				err = errors.New("nested foreach operation is not supported")
+			} else {
+				logicOpr := toStdLogic(opr[lastSpace+1:])
+				for _, lVal := range lArray {
+					pass, err = evaluateLR(a, lVal, right, foreachOpr)
+					if err != nil {
+						break
+					}
+					if logicOpr == logicAnd && pass == false {
+						break
+					}
+					if logicOpr == logicOr && pass == true {
+						break
+					}
+				}
+			}
+		}
+	}
+	if err != nil {
+		a.errorCallback(node, err.Error())
+	}
 	// put it into cache
 	cdtInfo := newArishemCondition(pass, left, lhsExpr.GetText(), right, rhsExpr.GetText(), opr, err)
 	a.dataCtx.Set(ctx.GetAltNumber(), cdtInfo)
@@ -234,7 +292,7 @@ func (a *arishemRuleVisitor) VisitFullCondition(ctx *parser.FullConditionContext
 	return pass
 }
 
-func (a *arishemRuleVisitor) VisitNullCondition(ctx *parser.NullConditionContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullCondition(_ *parser.NullConditionContext) interface{} {
 	return false
 }
 
@@ -261,7 +319,7 @@ func (a *arishemRuleVisitor) VisitExprAim(ctx *parser.ExprAimContext) interface{
 	return newArishemAim(a.Visit(ctx.ExprType()), aimTypeExpr)
 }
 
-func (a *arishemRuleVisitor) VisitNullAim(ctx *parser.NullAimContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullAim(_ *parser.NullAimContext) interface{} {
 	return nil
 }
 
@@ -291,7 +349,7 @@ func (a *arishemRuleVisitor) VisitFullExpr(ctx *parser.FullExprContext) interfac
 	return a.Visit(ctx.ExprType())
 }
 
-func (a *arishemRuleVisitor) VisitNullExpr(ctx *parser.NullExprContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullExpr(_ *parser.NullExprContext) interface{} {
 	return nil
 }
 
@@ -327,21 +385,59 @@ func (a *arishemRuleVisitor) VisitFeatureExprType(ctx *parser.FeatureExprTypeCon
 	return a.Visit(ctx.Feature())
 }
 
-func (a *arishemRuleVisitor) VisitNullExprType(ctx *parser.NullExprTypeContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullExprType(_ *parser.NullExprTypeContext) interface{} {
 	return nil
 }
 
 func (a *arishemRuleVisitor) VisitFullVar(ctx *parser.FullVarContext) interface{} {
 	const node = "VisitFullVar"
-	varPath := strings.Split(ctx.VarPath().VarPathVal().GetText(), strDot)
-	val, err := a.dataCtx.GetVarValue(varPath)
+	// 1. first check path whether contains double sharp '##'
+	varPathStr := ctx.VarPath().VarPathVal().GetText()
+	twinSharpCheck := strings.Split(varPathStr, "##")
+	var val interface{}
+	var err error
+	if len(twinSharpCheck) > 1 {
+		var elements []interface{}
+
+		slicePathStr := twinSharpCheck[0]
+		elementPathStr := twinSharpCheck[1]
+
+		slicePath := strings.Split(slicePathStr, strDot)
+		var slice interface{}
+		slice, err = a.dataCtx.GetVarValue(slicePath)
+		if err == nil {
+			if arr, ok := slice.([]interface{}); ok {
+				for _, eleObjI := range arr {
+					var ele map[string]interface{}
+					ele, ok = eleObjI.(map[string]interface{})
+					if !ok {
+						err = errors.New("var path use double sharp inner index of a wrong type")
+						break
+					}
+					var element interface{}
+					element, err = tools.MapIndex(ele, elementPathStr)
+					if err != nil {
+						break
+					}
+					elements = append(elements, element)
+				}
+			} else {
+				err = errors.New("var path use double sharp index of a wrong type")
+			}
+		}
+		// assign elements into val
+		val = elements
+	} else {
+		varPath := strings.Split(twinSharpCheck[0], strDot)
+		val, err = a.dataCtx.GetVarValue(varPath)
+	}
 	if err != nil {
 		a.errorCallback(node, err.Error())
 	}
 	return val
 }
 
-func (a *arishemRuleVisitor) VisitNullVar(ctx *parser.NullVarContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullVar(_ *parser.NullVarContext) interface{} {
 	return nil
 }
 
@@ -417,7 +513,7 @@ func (a *arishemRuleVisitor) VisitListMath(ctx *parser.ListMathContext) interfac
 	return left
 }
 
-func (a *arishemRuleVisitor) VisitNullMath(ctx *parser.NullMathContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullMath(_ *parser.NullMathContext) interface{} {
 	return nil
 }
 
@@ -461,7 +557,7 @@ func (a *arishemRuleVisitor) VisitParamListFunc(ctx *parser.ParamListFuncContext
 	return res
 }
 
-func (a *arishemRuleVisitor) VisitNullFunc(ctx *parser.NullFuncContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullFunc(_ *parser.NullFuncContext) interface{} {
 	return nil
 }
 
@@ -473,7 +569,7 @@ func (a *arishemRuleVisitor) VisitFullExprs(ctx *parser.FullExprsContext) interf
 	return exprs
 }
 
-func (a *arishemRuleVisitor) VisitNullExprs(ctx *parser.NullExprsContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullExprs(_ *parser.NullExprsContext) interface{} {
 	return nil
 }
 
@@ -502,7 +598,7 @@ func (a *arishemRuleVisitor) VisitFullFeature(ctx *parser.FullFeatureContext) in
 	return featVal
 }
 
-func (a *arishemRuleVisitor) VisitNullFeature(ctx *parser.NullFeatureContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullFeature(_ *parser.NullFeatureContext) interface{} {
 	return nil
 }
 
@@ -544,7 +640,7 @@ func (a *arishemRuleVisitor) VisitFullConstList(ctx *parser.FullConstListContext
 	return consts
 }
 
-func (a *arishemRuleVisitor) VisitNullConstList(ctx *parser.NullConstListContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullConstList(_ *parser.NullConstListContext) interface{} {
 	return nil
 }
 
@@ -556,6 +652,84 @@ func (a *arishemRuleVisitor) VisitFullKeyValues(ctx *parser.FullKeyValuesContext
 	return kv
 }
 
-func (a *arishemRuleVisitor) VisitNullKeyValues(ctx *parser.NullKeyValuesContext) interface{} {
+func (a *arishemRuleVisitor) VisitNullKeyValues(_ *parser.NullKeyValuesContext) interface{} {
 	return nil
+}
+
+func (a *arishemRuleVisitor) VisitSubCondExprType(ctx *parser.SubCondExprTypeContext) interface{} {
+	return a.Visit(ctx.SubCond())
+}
+
+type FullSubCond struct {
+	name string
+	tree antlr.ParseTree
+}
+
+func (a *arishemRuleVisitor) VisitFullSubCond(ctx *parser.FullSubCondContext) interface{} {
+	const node = "VisitFullSubCond"
+	// 1. get the condition name
+	condName := ctx.NameKey().NAME_KEY_TYPE().GetText()
+	if tools.IsBlank(condName) {
+		a.errorCallback(node, "sub condition name is empty")
+		return nil
+	}
+	// 2. get then condition parse tree
+	if a.condFinder == nil {
+		a.errorCallback(node, "condition finder not set while using sub condition feature")
+		return nil
+	}
+	condTree, err := a.condFinder(condName)
+	if err != nil {
+		a.errorCallback(node, "get the condition tree failed: "+err.Error())
+		return nil
+	}
+	return &FullSubCond{
+		name: condName,
+		tree: condTree,
+	}
+}
+
+func (a *arishemRuleVisitor) VisitNullSubCond(_ *parser.NullSubCondContext) interface{} {
+	return nil
+}
+
+func evaluateLR(ori *arishemRuleVisitor, left, right interface{}, opr string) (bool, error) {
+	var pass bool
+	var err error
+	if strings.Contains(opr, "SUB_COND") {
+		lData, ok := left.(map[string]interface{})
+		if !ok {
+			return false, errors.New("sub condition left type is not object")
+		}
+		rSubCond, ok := right.(*FullSubCond)
+		if !ok {
+			return false, errors.New("sub condition right type is not sub condition expression")
+		}
+		pass, err = evaluateSubCond(ori, rSubCond.name, lData, rSubCond.tree)
+		// if err is not nil, pass will have to be false
+		if err == nil && (strings.HasPrefix(opr, "!") || strings.HasPrefix(opr, "NOT")) {
+			// revert the judge result
+			pass = !pass
+		}
+	} else {
+		// judge the condition by opr with left and right
+		pass, err = operator.Judge(left, right, opr)
+	}
+	return pass, err
+}
+
+func evaluateSubCond(ori *arishemRuleVisitor, subCondName string, left map[string]interface{}, right antlr.ParseTree) (bool, error) {
+	newDataCtx, err := NewArishemDataCtxFromMeta(ori.dataCtx.Context(), left, ori.dataCtx.FetcherFetcher())
+	if err != nil {
+		return false, err
+	}
+	newVisitor := &arishemRuleVisitor{
+		BasearishemVisitor: &parser.BasearishemVisitor{
+			BaseParseTreeVisitor: &antlr.BaseParseTreeVisitor{},
+		},
+		observers:  ori.observers,
+		condFinder: ori.condFinder,
+	}
+	pass := newVisitor.VisitCondition(right, newDataCtx, &simpleVisitTarget{name: subCondName})
+	return pass, nil
 }

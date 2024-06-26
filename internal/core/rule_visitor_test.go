@@ -18,6 +18,7 @@ package core
 
 import (
 	"context"
+	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/parser"
 	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/gopkg/util/logger"
@@ -62,7 +63,9 @@ func (t *testArisVisitObserver) HashCode() string {
 
 func (t *testArisVisitObserver) OnJudgeNodeVisitEnd(ctx context.Context, info typedef.JudgeNode, vt typedef.VisitTarget) {
 	if info != nil {
-		logger.Infof("%v", *(info.(*arishemCondition)))
+		logger.Infof("left: %v, leftExpr: %v, right: %v, rightExpr: %v, operator: %v, target: %v, err: %v",
+			info.Left(), info.LeftExpr(), info.Right(), info.RightExpr(), info.Operator(), vt.Identifier(), info.Error(),
+		)
 	}
 }
 
@@ -236,7 +239,7 @@ func TestConditionVisit(t *testing.T) {
 		assert.Nil(t, err)
 		dc, err := NewArishemDataCtx(context.Background(), tc.fact, &testFeatureFetcher{})
 		assert.Nil(t, err)
-		arisVst := NewArishemRuleVisitor()
+		arisVst := NewArishemRuleVisitor(nil)
 		tavo := &testArisVisitObserver{hash: tc.name}
 		arisVst.AddVisitObserver(tavo)
 
@@ -354,11 +357,166 @@ func TestAimVisit(t *testing.T) {
 		assert.Nil(t, err)
 		dc, err := NewArishemDataCtx(context.Background(), tc.fact, &testFeatureFetcher{})
 		assert.Nil(t, err)
-		arisVst := NewArishemRuleVisitor()
+		arisVst := NewArishemRuleVisitor(nil)
 		tavo := &testArisVisitObserver{hash: tc.name}
 		arisVst.AddVisitObserver(tavo)
 
 		aim := arisVst.VisitAim(cdtCtx, dc, newArisVisitTarget(tc.name))
 		tc.check(aim, tavo.errMsgs)
+	}
+}
+
+func TestSubCondition(t *testing.T) {
+	testCases := []struct {
+		name       string
+		fact       string
+		expr       string
+		condFinder func(string) (antlr.ParseTree, error)
+		check      func(pass bool, errMsg []string)
+	}{
+		{
+			"SUB CONDITION: judge with INVALID left type",
+			`{}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"SUB_COND","Lhs":{"Const":{"NumConst":100}},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
+			func(_ string) (antlr.ParseTree, error) {
+				return parser.ParseArishemCondition(`{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}}]}`)
+			},
+			func(pass bool, errMsg []string) {
+				assert.False(t, pass)
+				assert.NotEmpty(t, errMsg)
+				t.Log(errMsg)
+			},
+		},
+		{
+			"SUB CONDITION: judge with INVALID right type",
+			`{}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"SUB_COND","Lhs":{"MapExpr":{"price":{"Const":{"NumConst":100}}}},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			func(_ string) (antlr.ParseTree, error) {
+				return parser.ParseArishemCondition(`{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}}]}`)
+			},
+			func(pass bool, errMsg []string) {
+				assert.False(t, pass)
+				assert.NotEmpty(t, errMsg)
+				t.Log(errMsg)
+			},
+		},
+		{
+			"SUB CONDITION: judge with INVALID condition finder",
+			`{}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"SUB_COND","Lhs":{"MapExpr":{"price":{"Const":{"NumConst":100}}}},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
+			nil,
+			func(pass bool, errMsg []string) {
+				assert.False(t, pass)
+				assert.NotEmpty(t, errMsg)
+				t.Log(errMsg)
+			},
+		},
+		{
+			"SUB CONDITION: judge with VALID type@1",
+			`{}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"SUB_COND","Lhs":{"MapExpr":{"price":{"Const":{"NumConst":100}}}},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
+			func(_ string) (antlr.ParseTree, error) {
+				return parser.ParseArishemCondition(`{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}}]}`)
+			},
+			func(pass bool, errMsg []string) {
+				assert.True(t, pass)
+				assert.Empty(t, errMsg)
+			},
+		},
+		{
+			"SUB CONDITION: judge with VALID type@2",
+			`{"item_info":{"name":"xxx","price":100}}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"SUB_COND","Lhs":{"VarExpr":"item_info"},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
+			func(_ string) (antlr.ParseTree, error) {
+				return parser.ParseArishemCondition(`{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}}]}`)
+			},
+			func(pass bool, errMsg []string) {
+				assert.True(t, pass)
+				assert.Empty(t, errMsg)
+			},
+		},
+		{
+			"SUB CONDITION: judge with VALID type@2",
+			`{"item_info":{"name":"xxx","price":100}}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"SUB_COND","Lhs":{"VarExpr":"item_info"},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
+			func(_ string) (antlr.ParseTree, error) {
+				return parser.ParseArishemCondition(`{"OpLogic":"&&","Conditions":[{"Operator":"<=","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"==","Lhs":{"VarExpr":"name"},"Rhs":{"Const":{"StrConst":"xxx"}}}]}`)
+			},
+			func(pass bool, errMsg []string) {
+				assert.False(t, pass)
+				assert.Empty(t, errMsg)
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Log(tc.name)
+		cdtCtx, err := parser.ParseArishemCondition(tc.expr)
+		assert.Nil(t, err)
+		dc, err := NewArishemDataCtx(context.Background(), tc.fact, &testFeatureFetcher{})
+		assert.Nil(t, err)
+		arisVst := NewArishemRuleVisitor(tc.condFinder)
+		tavo := &testArisVisitObserver{hash: tc.name}
+		arisVst.AddVisitObserver(tavo)
+
+		pass := arisVst.VisitCondition(cdtCtx, dc, newArisVisitTarget(tc.name))
+		tc.check(pass, tavo.errMsgs)
+		t.Log("\n")
+	}
+}
+
+func TestForeach(t *testing.T) {
+	testCases := []struct {
+		name       string
+		fact       string
+		expr       string
+		condFinder func(string) (antlr.ParseTree, error)
+		check      func(pass bool, errMsg []string)
+	}{
+		{
+			"SUB CONDITION: judge with FOREACH VALID pre-defined operator: PASS",
+			`{"item_info":{"item_list":[{"name":"name@1","price":100},{"name":"name@2","price":102.13},{"name":"name@3","price":200},{"name":"name@4","price":100},{"name":"name@5","price":101},{"name":"name@6","price":303.1234}]}}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH >= and","Lhs":{"VarExpr":"item_info.item_list##price"},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			nil,
+			func(pass bool, errMsg []string) {
+				assert.True(t, pass)
+				assert.Empty(t, errMsg)
+			},
+		}, {
+			"SUB CONDITION: judge with FOREACH VALID sub condition operator: PASS",
+			`{"item_info":{"item_list":[{"name":"name@1","price":100},{"name":"name@2","price":102.13},{"name":"name@3","price":200},{"name":"name@4","price":100},{"name":"name@5","price":101},{"name":"name@6","price":303.1234}]}}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH SUB_COND &&","Lhs":{"VarExpr":"item_info.item_list"},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
+			func(_ string) (antlr.ParseTree, error) {
+				return parser.ParseArishemCondition(`{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"STRING_CONTAINS","Lhs":{"VarExpr":"name"},"Rhs":{"Const":{"StrConst":"name@"}}}]}`)
+			},
+			func(pass bool, errMsg []string) {
+				assert.True(t, pass)
+				assert.Empty(t, errMsg)
+			},
+		}, {
+			"SUB CONDITION: judge with FOREACH VALID sub condition operator: NOT PASS",
+			`{"item_info":{"item_list":[{"name":"name@1","price":100},{"name":"name@2","price":102.13},{"name":"name@3","price":200},{"name":"name4","price":100},{"name":"name@5","price":101},{"name":"name@6","price":303.1234}]}}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH SUB_COND &&","Lhs":{"VarExpr":"item_info.item_list"},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
+			func(_ string) (antlr.ParseTree, error) {
+				return parser.ParseArishemCondition(`{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"STRING_CONTAINS","Lhs":{"VarExpr":"name"},"Rhs":{"Const":{"StrConst":"name@"}}}]}`)
+			},
+			func(pass bool, errMsg []string) {
+				assert.False(t, pass)
+				assert.Empty(t, errMsg)
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Log(tc.name)
+		cdtCtx, err := parser.ParseArishemCondition(tc.expr)
+		assert.Nil(t, err)
+		dc, err := NewArishemDataCtx(context.Background(), tc.fact, &testFeatureFetcher{})
+		assert.Nil(t, err)
+		arisVst := NewArishemRuleVisitor(tc.condFinder)
+		tavo := &testArisVisitObserver{hash: tc.name}
+		arisVst.AddVisitObserver(tavo)
+
+		pass := arisVst.VisitCondition(cdtCtx, dc, newArisVisitTarget(tc.name))
+		tc.check(pass, tavo.errMsgs)
+		t.Log("\n")
 	}
 }

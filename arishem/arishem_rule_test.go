@@ -71,7 +71,7 @@ func TestTryParse(t *testing.T) {
             }
         }
     }
-}`)
+}`, "NAME")
 	assert.NotNil(t, err)
 	t.Log(err.Error())
 	assert.Nil(t, cdtTree)
@@ -90,7 +90,7 @@ func TestTryParse2(t *testing.T) {
             }
         }
     }
-}`)
+}`, "NAME")
 	assert.NotNil(t, err)
 	assert.Nil(t, cdtTree)
 	assert.Nil(t, aimTree)
