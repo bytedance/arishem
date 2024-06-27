@@ -106,7 +106,7 @@ func NewNoPriorityRule(name string, cdtExpr, aimExpr string) (npr RuleTarget, er
 		err = errors.New("aim expression is empty")
 		return
 	}
-	cdtTree, aimTree, err := tryParse(cdtExpr, aimExpr)
+	cdtTree, aimTree, err := tryParse(cdtExpr, aimExpr, name)
 	if err != nil {
 		return
 	}
@@ -161,7 +161,7 @@ func (p *PriorityRule) Compare(other typedef.Comparable) int {
 	return cmp
 }
 
-func tryParse(cdtExpr, aimExpr string) (cdtTree, aimTree *RuleTree, err error) {
+func tryParse(cdtExpr, aimExpr, name string) (cdtTree, aimTree *RuleTree, err error) {
 	// compat two expressions
 	cdtExpr, err = tools.Compat(cdtExpr)
 	if err != nil {
@@ -205,6 +205,9 @@ func tryParse(cdtExpr, aimExpr string) (cdtTree, aimTree *RuleTree, err error) {
 
 	if cdtTree != nil {
 		arishemConfiguration.TCache.Put(cdtExpr, cdtTree)
+		if arishemConfiguration.SubCond != nil && arishemConfiguration.SubCond.RuleIdentityMapAsCondName() {
+			arishemConfiguration.SubCond.WhenConditionParsed(name, cdtExpr, cdtTree.Tree)
+		}
 	}
 	if aimTree != nil {
 		arishemConfiguration.TCache.Put(aimExpr, aimTree)

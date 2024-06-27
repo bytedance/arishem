@@ -60,6 +60,27 @@ type arishemDataCtx struct {
 	featureFetcher typedef.FeatureFetcher
 }
 
+func NewArishemDataCtxFromMeta(ctx context.Context, meta typedef.MetaType, ff typedef.FeatureFetcher) (dc typedef.DataCtx, err error) {
+	if ff == nil {
+		err = errors.New("feature fetcher can not be nil")
+		return
+	}
+	if meta == nil {
+		err = errors.New("meta data is nil")
+		return
+	}
+	dc = &arishemDataCtx{
+		ctx:            ctx,
+		factMeta:       meta,
+		visitCache:     &sync.Map{},
+		featLatches:    tools.NewOnceMap(),
+		featMap:        &sync.Map{},
+		extraMap:       &sync.Map{},
+		featureFetcher: ff,
+	}
+	return
+}
+
 func NewArishemDataCtx(ctx context.Context, factJSON string, ff typedef.FeatureFetcher) (dc typedef.DataCtx, err error) {
 	if ff == nil {
 		err = errors.New("feature fetcher can not be nil")

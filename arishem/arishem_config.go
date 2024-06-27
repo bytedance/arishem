@@ -37,17 +37,39 @@ type TreeCache interface {
 	Get(expr string) (tc *RuleTree, ok bool)
 }
 
+type SubConditionManage interface {
+	// WhenConditionParsed will be called when a condition expression successfully parsed
+	WhenConditionParsed(condName, expr string, tree antlr.ParseTree)
+	// GetConditionTree defines arishem how to get the condition parse tree by the condition name/key
+	GetConditionTree(condName string) (antlr.ParseTree, error)
+	// RuleIdentityMapAsCondName if this function return true,
+	// then every rule identity will be the condition name stored into cache when parse rule or condition
+	RuleIdentityMapAsCondName() bool
+}
+
 type Configuration struct {
 	Granularity func(int, ExecuteMode) int
+
 	// prefetch feature
 	Prefetch bool
 	TCache   TreeCache
+
 	// max parallel computation
 	MaxParallel        int
 	RuleComputePool    typedef.ConcurrentPool
 	FeatureFetchPool   typedef.ConcurrentPool
 	FeatFetcherFactory func() typedef.FeatureFetcher
 	FeatVisitCache     typedef.SharedVisitCache
+
+	// sub condition configuration
+	SubCond SubConditionManage
+}
+
+func (c *Configuration) getConditionFinder() func(string) (antlr.ParseTree, error) {
+	if c.SubCond == nil {
+		return nil
+	}
+	return c.SubCond.GetConditionTree
 }
 
 const (

@@ -1,5 +1,7 @@
 # Arishem文档
 
+## [快速开始](STARTUP_zh.md)
+
 ## 语法
 
 ### 1. Expr类型
@@ -30,6 +32,6 @@
 
 [Arishem实现网络数据访问](./FEATURE_zh.md)
 
-## 自定义配置和监听回调
+## 监听回调
 
-[Arishem自定义配置和监听回调](./CALLBACK_zh.md)
+[Arishem监听回调](./CALLBACK_zh.md)

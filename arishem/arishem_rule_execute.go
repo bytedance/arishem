@@ -42,7 +42,7 @@ func ExecuteSingleRule(rule RuleTarget, dc typedef.DataCtx, opts ...ExecuteOptio
 		passed: false,
 		aim:    nil,
 	}
-	rv := core.NewArishemRuleVisitor()
+	rv := core.NewArishemRuleVisitor(arishemConfiguration.getConditionFinder())
 	if len(opts) > 0 {
 		// consume visit context option
 		ApplyExecuteOptions(rv, nil, opts...)
@@ -106,7 +106,7 @@ func executePriorityRules(priRules []RuleTarget, dc typedef.DataCtx, opts ...Exe
 	// batch rules
 	batchedRules := batchRules(priRules, arishemConfiguration.Granularity(len(priRules), ExecuteModePriority))
 	// create visitor
-	rv := core.NewArishemRuleVisitor()
+	rv := core.NewArishemRuleVisitor(arishemConfiguration.getConditionFinder())
 	ApplyExecuteOptions(rv, dc, opts...)
 outer:
 	for idx, rules := range batchedRules {
@@ -152,7 +152,7 @@ func executeNoPriorityRules(noPriRules []RuleTarget, dc typedef.DataCtx, opts ..
 				defer wg.Done()
 				r := rI.(RuleTarget)
 
-				rv := core.NewArishemRuleVisitor()
+				rv := core.NewArishemRuleVisitor(arishemConfiguration.getConditionFinder())
 				ApplyExecuteOptions(rv, nil, opts...)
 				pass := rv.VisitCondition(r.ConditionPTree(), dc, r)
 				if pass {

@@ -100,6 +100,10 @@ func (v *BasearishemVisitor) VisitFeatureExprType(ctx *FeatureExprTypeContext) i
 	return v.VisitChildren(ctx)
 }
 
+func (v *BasearishemVisitor) VisitSubCondExprType(ctx *SubCondExprTypeContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BasearishemVisitor) VisitNullExprType(ctx *NullExprTypeContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -149,6 +153,14 @@ func (v *BasearishemVisitor) VisitFullFeature(ctx *FullFeatureContext) interface
 }
 
 func (v *BasearishemVisitor) VisitNullFeature(ctx *NullFeatureContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitFullSubCond(ctx *FullSubCondContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitNullSubCond(ctx *NullSubCondContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -233,6 +245,14 @@ func (v *BasearishemVisitor) VisitConstKey(ctx *ConstKeyContext) interface{} {
 }
 
 func (v *BasearishemVisitor) VisitConstListKey(ctx *ConstListKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitSubCondExprKey(ctx *SubCondExprKeyContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BasearishemVisitor) VisitCondNameKey(ctx *CondNameKeyContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

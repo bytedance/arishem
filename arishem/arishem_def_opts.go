@@ -18,6 +18,8 @@ package arishem
 
 import (
 	"context"
+	"errors"
+	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/pool"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
@@ -25,6 +27,7 @@ import (
 	"math"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -40,7 +43,7 @@ var (
 
 func WithDefMaxParallels() Option {
 	return func(cfg *Configuration) {
-		cfg.MaxParallel = 10 * (1 << 12)
+		cfg.MaxParallel = 1 << 12
 	}
 }
 
@@ -94,6 +97,57 @@ func WithDefFeatVisitCache() Option {
 		})
 		cfg.FeatVisitCache = &defaultFeatCache{c: c}
 	}
+}
+
+// WithEnableSubCondition will enable arishem using sub condition to judge a parent-condition which right hand type is SubCondExpr,
+// pairs allow users to add some default conditions when enable this feature
+// PAY ATTENTION: WithEnableSubCondition will panic if initialize invalid condition pair.
+func WithEnableSubCondition(pairs ...string) Option {
+	return func(cfg *Configuration) {
+		cfg.SubCond = &defaultSubConditionManage{
+			ExprDict: make(map[string]string, 128),
+		}
+		err := AddSubCondition(pairs...)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func WithCustomSubConditionConfig(sc SubConditionManage) Option {
+	return func(cfg *Configuration) {
+		cfg.SubCond = sc
+	}
+}
+
+type defaultSubConditionManage struct {
+	lock     sync.RWMutex
+	ExprDict map[string]string
+}
+
+func (d *defaultSubConditionManage) WhenConditionParsed(condName, expr string, _ antlr.ParseTree) {
+	d.lock.Lock()
+	d.ExprDict[condName] = expr
+	d.lock.Unlock()
+}
+
+func (d *defaultSubConditionManage) GetConditionTree(condName string) (antlr.ParseTree, error) {
+	d.lock.RLock()
+	expr, exist := d.ExprDict[condName]
+	d.lock.RUnlock()
+
+	if !exist {
+		return nil, errors.New("expression not find by condition name: " + condName)
+	}
+	tree, err := ParseCondition(expr)
+	if err != nil {
+		return nil, err
+	}
+	return tree.Tree, nil
+}
+
+func (d *defaultSubConditionManage) RuleIdentityMapAsCondName() bool {
+	return true
 }
 
 type defaultFeatureFeature struct{}

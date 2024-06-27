@@ -34,15 +34,45 @@ type dummyVisitTarget struct{ name string }
 
 func (d *dummyVisitTarget) Identifier() string { return d.name }
 
-// DataContext will create a new DataContext by fact meta json.
+// DataContext will create a new typedef.DataCtx by fact meta json.
 func DataContext(ctx context.Context, json string) (dc typedef.DataCtx, err error) {
 	dc, err = core.NewArishemDataCtx(ctx, json, arishemConfiguration.FeatFetcherFactory())
+	return
+}
+
+// DataContextFromMeta will create a new typedef.DataCtx by fact meta map
+func DataContextFromMeta(ctx context.Context, meta typedef.MetaType) (dc typedef.DataCtx, err error) {
+	dc, err = core.NewArishemDataCtxFromMeta(ctx, meta, arishemConfiguration.FeatFetcherFactory())
 	return
 }
 
 // ParseCondition will parse a condition string and return the rule tree with feature parameter pre-parsed.
 func ParseCondition(condition string) (tree *RuleTree, err error) {
 	return ParseRuleTree(condition, ExprTypeCondition)
+}
+
+// AddSubCondition adds a sub condition to arishem, it will be used at the moment of judging a condition which right hand type is SubCondExpr,
+// pairs allow users to add some conditions when enable arishem's sub-condition feature
+func AddSubCondition(pairs ...string) error {
+	size := len(pairs)
+	if size%2 != 0 {
+		return errors.New("pair number not valid")
+	}
+	if arishemConfiguration.SubCond == nil {
+		return errors.New("sub condition not enabled")
+	}
+	for i := 0; i < size; i += 2 {
+		condName := pairs[i]
+		condition := pairs[i+1]
+		tree, err := ParseRuleTree(condition, ExprTypeCondition)
+		if err != nil {
+			return err
+		}
+		if tree != nil && tree.Tree != nil {
+			arishemConfiguration.SubCond.WhenConditionParsed(condName, condition, tree.Tree)
+		}
+	}
+	return nil
 }
 
 // ParseAim will parse an aim string and return the rule tree with feature parameter pre-parsed.
@@ -86,7 +116,7 @@ func WalkAim(aimExpr string, dc typedef.DataCtx, opts ...ExecuteOption) (aim typ
 	if err != nil {
 		return
 	}
-	rv := core.NewArishemRuleVisitor()
+	rv := core.NewArishemRuleVisitor(arishemConfiguration.getConditionFinder())
 	ApplyExecuteOptions(rv, dc, opts...)
 	if len(tree.FeatParams) > 0 {
 		dc.PrefetchFeatures(tree.FeatParams)
@@ -97,7 +127,7 @@ func WalkAim(aimExpr string, dc typedef.DataCtx, opts ...ExecuteOption) (aim typ
 
 // WalkAimTree will visit the aimTree to get the result
 func WalkAimTree(aimTree antlr.ParseTree, dc typedef.DataCtx, opts ...ExecuteOption) (aim typedef.Aim) {
-	rv := core.NewArishemRuleVisitor()
+	rv := core.NewArishemRuleVisitor(arishemConfiguration.getConditionFinder())
 	ApplyExecuteOptions(rv, dc, opts...)
 	aim = rv.VisitAim(aimTree, dc, &dummyVisitTarget{name: aimTree.GetText()})
 	return
@@ -127,7 +157,7 @@ func JudgeConditionWithFactMeta(ctx context.Context, condition, factMeta string,
 	if err != nil {
 		return
 	}
-	rv := core.NewArishemRuleVisitor()
+	rv := core.NewArishemRuleVisitor(arishemConfiguration.getConditionFinder())
 	ApplyExecuteOptions(rv, dc, opts...)
 	if len(tree.FeatParams) > 0 {
 		dc.PrefetchFeatures(tree.FeatParams)

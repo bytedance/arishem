@@ -59,6 +59,7 @@ exprType
     |   funcExprKey     COLON   function        #funcExprType
     |   varExprKey      COLON   variable        #varExprType
     |   featureExprKey  COLON   feature         #featureExprType
+    |   subCondExprKey  COLON   subCond         #subCondExprType
     |   NULL                                    #nullExprType
     ;
 
@@ -89,6 +90,12 @@ feature
     |   NULL                                                                                            #nullFeature
     ;
 
+
+subCond
+    :   L_BRACE condNameKey COLON nameKey R_BRACE   #fullSubCond
+    |   NULL                                        #nullSubCond
+    ;
+
 constant
     :   L_BRACE numConstKey     COLON   numberType  R_BRACE     #numConst
     |   L_BRACE strConstKey     COLON   stringType  R_BRACE     #strConst
@@ -117,6 +124,8 @@ featureExprKey  :   QUOTATION   'FeatureExpr'   QUOTATION   ;
 featurePathKey  :   QUOTATION   'FeaturePath'   QUOTATION   ;
 constKey        :   QUOTATION   'Const'         QUOTATION   ;
 constListKey    :   QUOTATION   'ConstList'     QUOTATION   ;
+subCondExprKey  :   QUOTATION   'SubCondExpr'   QUOTATION   ;
+condNameKey     :   QUOTATION   'CondName'      QUOTATION   ;
 
 varPath         :   QUOTATION   varPathVal      QUOTATION   ;
 varPathVal      :   NAME_KEY_TYPE   (DOT NAME_KEY_TYPE)*    ;
@@ -263,6 +272,8 @@ operator
     |   'BETWEEN_ALL_OPEN'
     |   'BETWEEN_LEFT_OPEN_RIGHT_CLOSE'
     |   'BETWEEN_LEFT_CLOSE_RIGHT_OPEN'
+    |   'SUB_COND'
+    |   'FOREACH' ' ' operatorType ' ' opLogic
     ;
 
 NULL : 'null' ;

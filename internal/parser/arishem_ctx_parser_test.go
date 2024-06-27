@@ -222,6 +222,104 @@ func TestParseArishemConditionContext(t *testing.T) {
 				assert.NotNil(t, err)
 				t.Log(err.Error())
 			},
+		}, {
+			"INVALID: foreach wrong lower case",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"foreach > or","Lhs":{"VarExpr":"item.item_list##price"},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
+			},
+		}, {
+			"INVALID: foreach wrong spell",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"FOREAC > or","Lhs":{"VarExpr":"item.item_list##price"},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
+			},
+		}, {
+			"INVALID: foreach wrong operator",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"foreach list_im or","Lhs":{"VarExpr":"item.item_list##price"},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
+			},
+		}, {
+			"INVALID: foreach missing operator",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"FOREACH or","Lhs":{"VarExpr":"item.item_list##price"},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
+			},
+		}, {
+			"INVALID: foreach missing logic",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"foreach >","Lhs":{"VarExpr":"item.item_list##price"},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
+			},
+		}, {
+			"INVALID: foreach wrong sub_cond spell",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"FOREACH sub_cnd or","Lhs":{"VarExpr":"item.item_list##price"},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
+			},
+		}, {
+			"INVALID: wrong sub_cond spell",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"sub_cnd","Lhs":{"VarExpr":"item.item_list##price"},"Rhs":{"Const":{"NumConst":100}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.Nil(t, ctx)
+				assert.NotNil(t, err)
+				t.Log(err.Error())
+			},
+		}, {
+			"VALID: operator sub-condition",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"SUB_COND","Lhs":{"VarExpr":"item.item_property"},"Rhs":{"SubCondExpr":{"CondName":"MySubCond"}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.NotNil(t, ctx)
+				assert.Nil(t, err)
+			},
+		}, {
+			"VALID: foreach sub-condition with logic",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"FOREACH SUB_COND &&","Lhs":{"VarExpr":"item.item_property"},"Rhs":{"SubCondExpr":{"CondName":"MySubCond"}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.NotNil(t, ctx)
+				assert.Nil(t, err)
+			},
+		}, {
+			"VALID: foreach revert sub-condition with logic",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"FOREACH !SUB_COND &&","Lhs":{"VarExpr":"item.item_property"},"Rhs":{"SubCondExpr":{"CondName":"MySubCond"}}},{"Operator":"FOREACH NOT SUB_COND &&","Lhs":{"VarExpr":"item.item_property"},"Rhs":{"SubCondExpr":{"CondName":"MySubCond"}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.NotNil(t, ctx)
+				assert.Nil(t, err)
+			},
+		}, {
+			"VALID: foreach revert sub-condition with logic with no right expression check",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"FOREACH !SUB_COND &&","Lhs":{"VarExpr":"item.item_property"},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"FOREACH NOT SUB_COND &&","Lhs":{"VarExpr":"item.item_property"},"Rhs":{"Const":{"NumConst":1}}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.NotNil(t, ctx)
+				assert.Nil(t, err)
+			},
+		}, {
+			"VALID: foreach with var path fetch operator logic",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"FOREACH > &&","Lhs":{"VarExpr":"item.item_property##price"},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"FOREACH != and","Lhs":{"ConstList":[{"NumConst":1},{"StrConst":"xxxx"}]},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"FOREACH > or","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"FOREACH LIST_IN &&","Lhs":{"VarExpr":"item.item_property##price"},"Rhs":{"ConstList":[{"NumConst":1}]}},{"Operator":"FOREACH !LIST_IN &&","Lhs":{"VarExpr":"item.item_property##price"},"Rhs":{"ConstList":[{"NumConst":1}]}},{"Operator":"FOREACH !LIST_CONTAINS ||","Lhs":{"VarExpr":"item.item_property##price"},"Rhs":{"ConstList":[{"NumConst":1}]}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.NotNil(t, ctx)
+				assert.Nil(t, err)
+			},
+		}, {
+			"VALID: foreach with var path fetch operator logic",
+			`{"OpLogic":"AND","Conditions":[{"Operator":"FOREACH > &&","Lhs":{"VarExpr":"item.item_property##price"},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"FOREACH != and","Lhs":{"ConstList":[{"NumConst":1},{"StrConst":"xxxx"}]},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"FOREACH > or","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":1}}},{"Operator":"FOREACH LIST_IN &&","Lhs":{"VarExpr":"item.item_property##price"},"Rhs":{"ConstList":[{"NumConst":1}]}},{"Operator":"FOREACH !LIST_IN &&","Lhs":{"VarExpr":"item.item_property##price"},"Rhs":{"ConstList":[{"NumConst":1}]}},{"Operator":"FOREACH !LIST_CONTAINS ||","Lhs":{"VarExpr":"item.item_property##price"},"Rhs":{"ConstList":[{"NumConst":1}]}}]}`,
+			func(ctx ICondEntityContext, err error) {
+				assert.NotNil(t, ctx)
+				assert.Nil(t, err)
+			},
 		},
 	}
 	for _, testCase := range testCases {

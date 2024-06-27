@@ -6,6 +6,7 @@
 
 Arishem另一个强大的特性就是根据操作符自动进行类型兼容，在基本操作符判断的时候，**如果左值的类型和右值的类型不匹配，那么arishem将会以右值类型为标准对左值进行转换。**
 
+以下是arishem支持的操作符
 - 基本操作符
 
 | 运算符  | 中文名   | 说明                     | 举例                                                   |
@@ -22,22 +23,23 @@ Arishem另一个强大的特性就是根据操作符自动进行类型兼容，�
 
 arishem在进行列表相关的操作时，会默认尝试对左值和右值进行列表类型转换，转换失败判断将会返回false。该列表下所有的操作符在前面加上'NOT '或者'!'表示取非的逻辑，如'LIST_IN'取非操作就表示为'NOT LIST_IN'或'!LIST_IN'。
 
-| 运算符                        | 中文名                   | 说明                                                         | 举例                                                         |
-| ----------------------------- | ------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| LIST_IN                       | list包含                 | 支持数字和字符串和布尔值；真实含义是：在...中                | A在[A,B,C]中                                                 |
-| LIST_RETAIN                   | list有交集               | 支持数字和字符串和布尔值；两个list校验是否有交集，在进行比较时，布尔值将被转换成1(true)和0(false)。 | [A,B,C]跟[B,C,D]有交集                                       |
-| LIST_CONTAINS                 | list包含                 | 一个list包含某一项                                           | [A,B,C]包含C                                                 |
-| STRING_START_WITH             | 字符串以X开头            |                                                              | "app"以"a"开头                                               |
-| STRING_END_WITH               | 字符串以X结尾            |                                                              | "app"不以"b"开头                                             |
-| STRING_CONTAINS               | 字符串包含               | 效率很差，不建议用                                           | "access"包含"e"                                              |
-| CONTAIN_REGULAR               | 字符串正则匹配           | 不建议大量使用，性能不佳                                     | 正则"你看不明白\|看不懂吗\|装不懂"与字符串"装不懂"匹配       |
-| SUB_LIST_IN                   | 子序列(左值)包含于(右值) | 支持数字和字符串；真实含义是：左值 是 右值的一个子列表(序列) | [A,B][A,C]是[A,B,C]的一个子列表[A]是[A]的一个子列表[A,M]不是[A,B,C]的一个子列表 |
-| SUB_LIST_CONTAINS             | (左值)包含子序列(右值)   | 支持数字和字符串；真实含义是：左值 包含了 右值这个子列表(序列) | [A,B,C]包含了[A,B]这个子列表[A,B]不包含[A,B,C]这个子列表[A,B]不包含[M,N]这个子列表 |
-| BETWEEN_ALL_CLOSE             | 左值在右值区间，左右闭   | 右值为数组类型，元素个数等于2，默认第一个元素为左区间元素，第二个为右区间元素，当右值数组元素大于2时，取第一个和第二个进行判断 | 1 在 [1,5] 之间，1 不在 [2,5] 之间                           |
-| BETWEEN_ALL_OPEN              | 左值在右值区间，左右开   |                                                              | 1 在 (0, 3) 之间1 不在 (1, 5) 之间                           |
-| BETWEEN_LEFT_OPEN_RIGHT_CLOSE | 左值在右值区间，左开右闭 |                                                              | 1 在 (0, 3] 之间1 不在 (1, 3] 之间3 在 (1, 3] 之间           |
-| BETWEEN_LEFT_CLOSE_RIGHT_OPEN | 左值在右值区间，左闭右开 |                                                              | 1 在 [1, 3) 之间2 在 [1, 3) 之间3 不在 [1, 3) 之间           |
-
+| 运算符                                                 | 中文名                           | 说明                                                                                                             | 举例                                                                                                   |
+|-----------------------------------------------------|-------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| LIST_IN                                             | list包含                        | 支持数字和字符串和布尔值；真实含义是：在...中                                                                                       | A在[A,B,C]中                                                                                           |
+| LIST_RETAIN                                         | list有交集                       | 支持数字和字符串和布尔值；两个list校验是否有交集，在进行比较时，布尔值将被转换成1(true)和0(false)。                                                    | [A,B,C]跟[B,C,D]有交集                                                                                   |
+| LIST_CONTAINS                                       | list包含                        | 一个list包含某一项                                                                                                    | [A,B,C]包含C                                                                                           |
+| STRING_START_WITH                                   | 字符串以X开头                       |                                                                                                                | "app"以"a"开头                                                                                          |
+| STRING_END_WITH                                     | 字符串以X结尾                       |                                                                                                                | "app"不以"b"开头                                                                                         |
+| STRING_CONTAINS                                     | 字符串包含                         | 效率很差，不建议用                                                                                                      | "access"包含"e"                                                                                        |
+| CONTAIN_REGULAR                                     | 字符串正则匹配                       | 不建议大量使用，性能不佳                                                                                                   | 正则"鲜花\|鲜花饼\|满地鲜花"与字符串"鲜花"匹配                                                                          |
+| SUB_LIST_IN                                         | 子序列(左值)包含于(右值)                | 支持数字和字符串；真实含义是：左值 是 右值的一个子列表(序列)                                                                               | [A,B][A,C]是[A,B,C]的一个子列表[A]是[A]的一个子列表[A,M]不是[A,B,C]的一个子列表                                            |
+| SUB_LIST_CONTAINS                                   | (左值)包含子序列(右值)                 | 支持数字和字符串；真实含义是：左值 包含了 右值这个子列表(序列)                                                                              | [A,B,C]包含了[A,B]这个子列表[A,B]不包含[A,B,C]这个子列表[A,B]不包含[M,N]这个子列表                                           |
+| BETWEEN_ALL_CLOSE                                   | 左值在右值区间，左右闭                   | 右值为数组类型，元素个数等于2，默认第一个元素为左区间元素，第二个为右区间元素，当右值数组元素大于2时，取第一个和第二个进行判断                                               | 1 在 [1,5] 之间，1 不在 [2,5] 之间                                                                           |
+| BETWEEN_ALL_OPEN                                    | 左值在右值区间，左右开                   |                                                                                                                | 1 在 (0, 3) 之间1 不在 (1, 5) 之间                                                                          |
+| BETWEEN_LEFT_OPEN_RIGHT_CLOSE                       | 左值在右值区间，左开右闭                  |                                                                                                                | 1 在 (0, 3] 之间1 不在 (1, 3] 之间3 在 (1, 3] 之间                                                             |
+| BETWEEN_LEFT_CLOSE_RIGHT_OPEN                       | 左值在右值区间，左闭右开                  |                                                                                                                | 1 在 [1, 3) 之间2 在 [1, 3) 之间3 不在 [1, 3) 之间                                                             |
+| SUB_COND    <font color="red"><sup>new</sup></font> | 左值满足子条件                       | 适用于对左值做复杂判断的场景，左值必须是object类型，右值必须是SubCondExpr来指定其运算子条件, 子条件运行时，入参为左值，与当前规则运算的入参数**互相独立**                       | 左值: {"name": "Mike", age: 20} 满足子条件 `MikeIsAdult` name == "Mike" && age >= 18, 详见[表达式部分](EXPR_zh.md) |
+| FOREACH ${Operator} ${OpLogic} <font color="red"><sup>new</sup></font>                     | 左值的${每一项\|任一项} 满足 ${Operator} | 适用于左值是数组类型时，对左值的每一个元素做单独判断的场景，只支持单层，不支持多层FOREACH嵌套, ${Operator}是arishem支持的任意一个操作符，${OpLogic}是arishem支持的逻辑与或操作符 | 左值: [1,2,3,4] 满足 `FOREACH > &&` 右值: 0 的含义是：左值里的每一项大于0,详见[表达式部分](EXPR_zh.md)                          |
 ## 内置函数
 
 arishem内置函数分为3类，不需要参数的func、参数为列表的func以及参数为map的func。
@@ -84,7 +86,7 @@ arishem内置函数分为3类，不需要参数的func、参数为列表的func�
 | RandomUUIDWithReplacer    | 一个参数：**replacer(可选)：**将替换原有UUID自带的分隔符"-"  | string     | 将UUID自带的"-"分隔符用replacer进行替换，返回新连接符的UUID  | replacer："" 8e1d6b823f6f38bb3eb7c7b3556286c3replacer: "#" c804d25d#b6d0#8e31#1e30#e72188745f42 |                                                              |
 | MarshalString | 两个参数：<br />1.target：要encoding的对象<br />2. escape_html：是否转移html特殊字符 | string | target可以为任意类型 |  | |
 
-## 注册自定义函数
+## 注册自定义函数 <font color="red"><sup>new</sup></font>
 在arishem初始化时，通过三种option注册三种类型入参的自定义函数。
 ```go
 func init() {
@@ -105,19 +107,19 @@ func init() {
     )
 }
 ```
-- 无参数的自定义函数
+- 无参数的自定义函数 <font color="red"><sup>new</sup></font>
 ```go
 WithCustomNoParamFuncs(arishem.NoParamFnPair{Name: "NPGreeting", Fn: func(ctx context.Context) (interface{}, error) {
     return "hello arishem", nil
 }}),
 ```
-- Map参数类型的自定义函数
+- Map参数类型的自定义函数 <font color="red"><sup>new</sup></font>
 ```go
 WithCustomMapParamFuncs(MapParamFnPair{Name: "MPGreeting", Fn: func(ctx context.Context, params map[string]interface{}) (interface{}, error) {
     return "Hello " + tools.ConvToUnifiedStringType(param["name"]), nil
 }}),
 ```
-- List参数类型的自定义函数
+- List参数类型的自定义函数 <font color="red"><sup>new</sup></font>
 ```go
 WithCustomListParamFuncs(ListParamFnPair{Name: "LPGreeting", Fn: func(ctx context.Context, params []interface{}) (interface{}, error) {
     return "Hello " + tools.ConvToUnifiedStringType(param[0]), nil
