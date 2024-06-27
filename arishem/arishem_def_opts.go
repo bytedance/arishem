@@ -27,6 +27,7 @@ import (
 	"math"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -103,14 +104,8 @@ func WithDefFeatVisitCache() Option {
 // PAY ATTENTION: WithEnableSubCondition will panic if initialize invalid condition pair.
 func WithEnableSubCondition(pairs ...string) Option {
 	return func(cfg *Configuration) {
-		c, _ := ristretto.NewCache(&ristretto.Config{
-			NumCounters:        10 * defTreeSz,
-			MaxCost:            defTreeSz,
-			BufferItems:        64,
-			IgnoreInternalCost: true,
-		})
 		cfg.SubCond = &defaultSubConditionManage{
-			ExprDict: c,
+			ExprDict: make(map[string]string, 128),
 		}
 		err := AddSubCondition(pairs...)
 		if err != nil {
@@ -126,19 +121,25 @@ func WithCustomSubConditionConfig(sc SubConditionManage) Option {
 }
 
 type defaultSubConditionManage struct {
-	ExprDict *ristretto.Cache
+	lock     sync.RWMutex
+	ExprDict map[string]string
 }
 
-func (d *defaultSubConditionManage) WhenConditionParsed(condName, expr string, tree antlr.ParseTree) {
-	d.ExprDict.Set(condName, expr, 1)
+func (d *defaultSubConditionManage) WhenConditionParsed(condName, expr string, _ antlr.ParseTree) {
+	d.lock.Lock()
+	d.ExprDict[condName] = expr
+	d.lock.Unlock()
 }
 
 func (d *defaultSubConditionManage) GetConditionTree(condName string) (antlr.ParseTree, error) {
-	expr, exist := d.ExprDict.Get(condName)
-	if !exist || expr == nil {
-		return nil, errors.New("expression not find by " + condName)
+	d.lock.RLock()
+	expr, exist := d.ExprDict[condName]
+	d.lock.RUnlock()
+
+	if !exist {
+		return nil, errors.New("expression not find by condition name: " + condName)
 	}
-	tree, err := ParseCondition(expr.(string))
+	tree, err := ParseCondition(expr)
 	if err != nil {
 		return nil, err
 	}

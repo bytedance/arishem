@@ -205,7 +205,7 @@ func tryParse(cdtExpr, aimExpr, name string) (cdtTree, aimTree *RuleTree, err er
 
 	if cdtTree != nil {
 		arishemConfiguration.TCache.Put(cdtExpr, cdtTree)
-		if arishemConfiguration.SubCond != nil {
+		if arishemConfiguration.SubCond != nil && arishemConfiguration.SubCond.RuleIdentityMapAsCondName() {
 			arishemConfiguration.SubCond.WhenConditionParsed(name, cdtExpr, cdtTree.Tree)
 		}
 	}

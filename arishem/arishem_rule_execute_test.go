@@ -408,4 +408,20 @@ func TestForeachWithSubCondition(t *testing.T) {
 	)
 	assert.Nil(t, err)
 	assert.True(t, pass)
+	// case4 normal foreach test
+	pass, err = JudgeConditionWithFactMeta(
+		context.Background(),
+		`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH < or","Lhs":{"VarExpr":"item_info.price_list"},"Rhs":{"Const":{"NumConst":-1}}}]}`,
+		`{"item_info":{"price_list":[100,102.13,200,100,101,303.1234]}}`,
+	)
+	assert.Nil(t, err)
+	assert.False(t, pass)
+
+	pass, err = JudgeConditionWithFactMeta(
+		context.Background(),
+		`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH > or","Lhs":{"VarExpr":"item_info.price_list"},"Rhs":{"Const":{"NumConst":-1}}}]}`,
+		`{"item_info":{"price_list":[100,102.13,200,100,101,303.1234]}}`,
+	)
+	assert.Nil(t, err)
+	assert.True(t, pass)
 }
