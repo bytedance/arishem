@@ -16,6 +16,7 @@ arishem的最小构成为Expr类型，在arishem中**必须由一对大括号包
 | FuncExpr      | FuncExpr    | 使用arishem内置函数                     |
 | VarExpr       | VarExpr     | 从实时数据中获取数据的路径表达式                  |
 | FeatureExpr   | FeatureExpr | 从外部网络中获取数据的路径表达式                  |
+| SubCondExpr <font color="red"><sup>new</sup></font>  | SubCondExpr | 右值是作为子条件进行运算的方式 |
 | null          | 无           | 空类型的Expr                          |
 
 按照拆解的原则，ListExpr和MapExpr都是Expr的特定组合，故先从最小的Expr类型进行说明。
@@ -109,7 +110,7 @@ arishem解析后
 ["name", 1.234, false]
 ```
 
-## 3. VarExpr
+## 3. VarExpr <font color="red"><sup>new</sup></font>
 
 VarExpr表示一个路径，该路径表示某个值在**实时数据**
 中的取值路径。arishem的取值路径和JSON相似，但又有所不同。VarExpr的格式为a.b.c。每一个用'.'分割的元素都是实时数据中的某个value的key，
@@ -157,6 +158,52 @@ arishem解析后
 
 ```go
 20
+```
+
+- 支持list类型的元素收集，语法为list元素后紧跟‘##’,只支持单个字段的收集
+
+ 如有这么一段数据
+```json
+{
+    "item_info": {
+        "item_list": [
+            {
+                "name": "name@1",
+                "price": 100
+            },
+            {
+                "name": "name@2",
+                "price": 102.13
+            },
+            {
+                "name": "name@3",
+                "price": 200
+            },
+            {
+                "name": "name@4",
+                "price": 100
+            },
+            {
+                "name": "name@5",
+                "price": 101
+            },
+            {
+                "name": "name@6",
+                "price": 303.1234
+            }
+        ]
+    }
+}
+```
+收集里面的所有price字段
+```json
+{
+    "VarExpr": "item_info.item_list##price"
+}
+```
+那么arishem解析后为
+```json
+[100,102.13,200,100,101,303.1234]
 ```
 
 ## 4. FeatureExpr
@@ -384,3 +431,98 @@ MapExpr和ListExpr类型相似，表示有一个或多个由Expr类型组成的�
 }
 ```
 
+## 9. SubCondExpr <font color="red"><sup>new</sup></font>
+使用该表达式必须启用了arishem对子条件的判断支持，详见[快速开始的配置部分](STARTUP_zh.md)
+
+该表达式表示一个子条件，只能作用于条件的右值表达式，并用CondName指定要使用子条件，举个具体的例子，要判断入参中的商品列表里的每一个商品都满足 名称包含xxx 并且 价格 大于100:
+
+入参：
+```json
+{
+    "item_info": {
+        "item_list": [
+            {
+                "name": "name@1",
+                "price": 100
+            },
+            {
+                "name": "name@2",
+                "price": 102.13
+            },
+            {
+                "name": "name@3",
+                "price": 200
+            },
+            {
+                "name": "name@4",
+                "price": 100
+            },
+            {
+                "name": "name@5",
+                "price": 101
+            },
+            {
+                "name": "name@6",
+                "price": 303.1234
+            }
+        ]
+    }
+}
+```
+规则的条件表达式:
+```json
+{
+  "OpLogic": "&&",
+  "Conditions": [
+    {
+      "Operator": "FOREACH SUB_COND and",
+      "Lhs": {
+        "VarExpr": "item_info.item_list"
+      },
+      "Rhs": {
+        "SubCondExpr": {
+          "CondName": "NameAndPriceMatch"
+        }
+      }
+    }
+  ]
+}
+```
+在运算上述条件前，请确保你已经向arishem中注册了NameAndPriceMatch这样一个子条件
+```json
+{
+    "OpLogic": "&&",
+    "Conditions": [
+        {
+            "Operator": ">",
+            "Lhs": {
+                "VarExpr": "price"
+            },
+            "Rhs": {
+                "Const": {
+                    "NumConst": 10
+                }
+            }
+        },
+        {
+            "Operator": "STRING_CONTAINS",
+            "Lhs": {
+                "VarExpr": "name"
+            },
+            "Rhs": {
+                "Const": {
+                    "StrConst": "name@"
+                }
+            }
+        }
+    ]
+}
+```
+代码描述
+```go
+err := AddSubCondition("NameAndPriceMatch", ${sub condition expression})
+assert.Nil(t, err)
+pass, err := JudgeConditionWithFactMeta(context.Background(), ${this rule conition}, ${FactData})
+assert.Nil(t, err)
+assert.True(t, pass)
+```

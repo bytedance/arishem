@@ -43,7 +43,7 @@ var (
 
 func WithDefMaxParallels() Option {
 	return func(cfg *Configuration) {
-		cfg.MaxParallel = 10 * (1 << 12)
+		cfg.MaxParallel = 1 << 12
 	}
 }
 

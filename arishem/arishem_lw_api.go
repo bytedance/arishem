@@ -58,6 +58,9 @@ func AddSubCondition(pairs ...string) error {
 	if size%2 != 0 {
 		return errors.New("pair number not valid")
 	}
+	if arishemConfiguration.SubCond == nil {
+		return errors.New("sub condition not enabled")
+	}
 	for i := 0; i < size; i += 2 {
 		condName := pairs[i]
 		condition := pairs[i+1]
@@ -65,7 +68,7 @@ func AddSubCondition(pairs ...string) error {
 		if err != nil {
 			return err
 		}
-		if arishemConfiguration.SubCond != nil && tree != nil && tree.Tree != nil {
+		if tree != nil && tree.Tree != nil {
 			arishemConfiguration.SubCond.WhenConditionParsed(condName, condition, tree.Tree)
 		}
 	}
