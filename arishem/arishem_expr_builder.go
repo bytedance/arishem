@@ -16,6 +16,26 @@
 
 package arishem
 
+import (
+	"errors"
+	"math"
+	"strconv"
+)
+
+type Float float64
+
+func (f Float) MarshalJSON() ([]byte, error) {
+	n := float64(f)
+	if math.IsInf(n, 0) || math.IsNaN(n) {
+		return nil, errors.New("unsupported number")
+	}
+	prec := -1
+	if math.Trunc(n) == n {
+		prec = 1 // Force ".0" for integers.
+	}
+	return strconv.AppendFloat(nil, n, 'f', prec, 64), nil
+}
+
 type Const struct {
 	BoolConst *bool       `json:"BoolConst,omitempty"`
 	NumConst  interface{} `json:"NumConst,omitempty"`
