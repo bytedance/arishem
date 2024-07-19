@@ -18,7 +18,6 @@ package arishem
 
 import (
 	"context"
-	"github.com/bytedance/arishem/internal/operator"
 	"github.com/bytedance/arishem/internal/parser"
 	"github.com/stretchr/testify/assert"
 	"math"
@@ -27,8 +26,8 @@ import (
 
 func TestBuildCondition(t *testing.T) {
 	condGroup := NewConditionsCondGroup(OpLogicAnd)
-	cond1 := NewCondition(operator.Equal)
-	cond1.Lhs = NewConstExpr(NewNumConst(1.0))
+	cond1 := NewCondition(Equal)
+	cond1.Lhs = NewConstExpr(NewNumConst(Float(1.0)))
 	cond1.Rhs = NewConstExpr(NewNumConst(int64(math.MaxInt64)))
 	condGroup.AddConditions(cond1)
 	expr, err := condGroup.Build()
@@ -36,7 +35,7 @@ func TestBuildCondition(t *testing.T) {
 	assert.NotEmpty(t, expr)
 	assert.Equal(t, `{"OpLogic":"&&","Conditions":[{"Operator":"==","Lhs":{"Const":{"NumConst":1}},"Rhs":{"Const":{"NumConst":9223372036854775807}}}]}`, expr)
 
-	cond2 := NewCondition(operator.ListIn, NOT)
+	cond2 := NewCondition(ListIn, NOT)
 	var varPath VarExpr = "user.user_list#2.name"
 	cond2.Lhs = NewVarExpr(&varPath)
 	cond2.Rhs = NewConstListExpr([]*Const{

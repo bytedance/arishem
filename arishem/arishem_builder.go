@@ -16,9 +16,35 @@
 
 package arishem
 
+import "github.com/bytedance/arishem/internal/operator"
+
 type Not string
 
 const NOT Not = "!"
+
+const (
+	IsNull                    = operator.IsNull
+	Equal                     = operator.Equal
+	NotEqual                  = operator.NotEqual
+	Greater                   = operator.Greater
+	Less                      = operator.Less
+	GreaterOrEqual            = operator.GreaterOrEqual
+	LessOrEqual               = operator.LessOrEqual
+	StringStartWith           = operator.StringStartWith
+	StringEndWith             = operator.StringEndWith
+	StringContains            = operator.StringContains
+	ContainRegexp             = operator.ContainRegexp
+	ListIn                    = operator.ListIn
+	ListContains              = operator.ListContains
+	ListRetain                = operator.ListRetain
+	SubListIn                 = operator.SubListIn
+	SubListContains           = operator.SubListContains
+	ListVagueContains         = operator.ListVagueContains
+	BetweenAllClose           = operator.BetweenAllClose
+	BetweenAllOpen            = operator.BetweenAllOpen
+	BetweenLeftOpenRightClose = operator.BetweenLeftOpenRightClose
+	BetweenLeftCloseRightOpen = operator.BetweenLeftCloseRightOpen
+)
 
 const (
 	OpLogicAnd = "&&"

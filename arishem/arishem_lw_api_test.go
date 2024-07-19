@@ -263,8 +263,8 @@ func case6() {
 func case4() {
 	condGroup := NewConditionsCondGroup(OpLogicAnd)
 	cond1 := NewCondition(operator.Equal)
-	cond1.Lhs = NewConstExpr(NewNumConst(1.0))
-	cond1.Rhs = NewConstExpr(NewNumConst(1.0))
+	cond1.Lhs = NewConstExpr(NewNumConst(Float(1)))
+	cond1.Rhs = NewConstExpr(NewNumConst(Float(0)))
 	condGroup.AddConditions(cond1)
 	expr, _ := condGroup.Build()
 	println(expr)
