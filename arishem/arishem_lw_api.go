@@ -21,6 +21,7 @@ import (
 	"errors"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/core"
+	"github.com/bytedance/arishem/internal/parser"
 	"github.com/bytedance/arishem/tools"
 	"github.com/bytedance/arishem/typedef"
 	"strings"
@@ -107,6 +108,19 @@ func ParseRuleTree(expr string, exprType ExprType) (exprTree *RuleTree, err erro
 		arishemConfiguration.TCache.Put(expr, exprTree)
 	}
 	return
+}
+
+func WalkFeature(featureExpr string) (typedef.FeatureParam, error) {
+	fppl := core.NewFeaturePreParseListener()
+	err := parser.ParseSingleFeature(featureExpr, fppl)
+	if err != nil {
+		return nil, err
+	}
+	featureParams := fppl.Data()
+	if len(featureParams) <= 0 {
+		return nil, errors.New("parse failed: empty feature params")
+	}
+	return featureParams[0], nil
 }
 
 // WalkAim will try to parse the aimExpr into the antlr parse tree and visit it to get the result, err will not be null when parse aim expression failed.
