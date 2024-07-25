@@ -24,7 +24,32 @@ import (
 	"strings"
 )
 
-//ParseArishemCondition parse condition group context from expression string, return an error if syntax is not valid.
+func ParseSingleExpr(expr string, pos typedef.ParseObserver) error {
+	if pos == nil {
+		return errors.New("feature parse observer is nil")
+	}
+	// parse listener
+	cl := NewCachedListener()
+	ruleParser, err := parseArishemRuleFromStr(expr, cl.tokenCEL)
+	if err != nil {
+		return err
+	}
+	if !cl.CheckSyntaxValid() {
+		return cl.GenerateError()
+	}
+	// remove error default listeners
+	ruleParser.RemoveErrorListeners()
+	// add parse listener
+	ruleParser.AddErrorListener(cl.parseCEL)
+
+	cl.AddListenerProxy(pos)
+	ruleParser.AddParseListener(cl)
+
+	_ = ruleParser.Expr()
+	return nil
+}
+
+// ParseArishemCondition parse condition group context from expression string, return an error if syntax is not valid.
 func ParseArishemCondition(expr string, pos ...typedef.ParseObserver) (ICondEntityContext, error) {
 	// parse listener
 	cl := NewCachedListener()

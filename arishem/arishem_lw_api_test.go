@@ -345,3 +345,55 @@ func TestWalkAim(t *testing.T) {
 		testCase.check(WalkAim(testCase.aimExpr, dc))
 	}
 }
+
+func TestParseFeature(t *testing.T) {
+	testCases := []*struct {
+		featExpr string
+		check    func(fp typedef.FeatureParam, err error)
+	}{
+		{
+			`{"FeatureExpr":{"FeaturePath":"Hit_Knowledge_Count","BuiltinParam":{"Knowledge_id":{"ConstList":[{"NumConst":7348866865063544851},{"NumConst":7348866865063790611}]},"Start_time":{"Const":{"StrConst":"2024-01-01"}}}}}`,
+			func(fp typedef.FeatureParam, err error) {
+				assert.Nil(t, fp)
+				assert.NotNil(t, err)
+				fmt.Printf("%v\n", err)
+			},
+		},
+		{
+			`{"FeatureExpr":{"FeaturePath":"Hit_Knowledge_Count.xxxx","BuiltinParam":{"Knowledge_id":{"ConstList":[{"NumConst":7348866865063544851},{"NumConst":7348866865063790611}]},"Start_time":{"Const":{"StrConst":"2024-01-01"}}}}}`,
+			func(fp typedef.FeatureParam, err error) {
+				assert.Nil(t, err)
+				assert.NotNil(t, fp)
+				assert.NotNil(t, fp.BuiltinParam())
+				assert.Equal(t, fp.FeatureName(), "Hit_Knowledge_Count")
+				idList := fp.BuiltinParam()["Knowledge_id"]
+				assert.NotEmpty(t, idList)
+				for _, i := range idList.([]interface{}) {
+					fmt.Printf("%v\n", i)
+				}
+
+			},
+		},
+		{
+			`{"FeatureExpr":{"FeaturePath":"user_center.user_personality"}}`,
+			func(fp typedef.FeatureParam, err error) {
+				assert.Nil(t, err)
+				assert.NotNil(t, fp)
+				assert.Nil(t, fp.BuiltinParam())
+				assert.Equal(t, fp.FeatureName(), "user_center")
+			},
+		},
+		{
+			`{"MathExpr":{"OpMath":">","ParamList":[{"Const":{"NumConst":100}},{"Const":{"NumConst":20}}]}}`,
+			func(fp typedef.FeatureParam, err error) {
+				assert.Nil(t, fp)
+				assert.NotNil(t, err)
+				fmt.Printf("%v\n", err)
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		featParam, err := ParseSingleFeature(testCase.featExpr)
+		testCase.check(featParam, err)
+	}
+}
