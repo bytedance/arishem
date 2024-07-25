@@ -110,10 +110,10 @@ func ParseRuleTree(expr string, exprType ExprType) (exprTree *RuleTree, err erro
 	return
 }
 
-// ParseFeature input a feature expression string and return the typedef.FeatureParam
-func ParseFeature(featureExpr string) (typedef.FeatureParam, error) {
+// ParseSingleFeature input a feature expression string and return the typedef.FeatureParam
+func ParseSingleFeature(featureExpr string) (typedef.FeatureParam, error) {
 	fppl := core.NewFeaturePreParseListener()
-	err := parser.ParseSingleFeature(featureExpr, fppl)
+	err := parser.ParseSingleExpr(featureExpr, fppl)
 	if err != nil {
 		return nil, err
 	}

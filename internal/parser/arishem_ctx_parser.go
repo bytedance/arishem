@@ -24,7 +24,7 @@ import (
 	"strings"
 )
 
-func ParseSingleFeature(expr string, pos typedef.ParseObserver) error {
+func ParseSingleExpr(expr string, pos typedef.ParseObserver) error {
 	if pos == nil {
 		return errors.New("feature parse observer is nil")
 	}
@@ -45,7 +45,7 @@ func ParseSingleFeature(expr string, pos typedef.ParseObserver) error {
 	cl.AddListenerProxy(pos)
 	ruleParser.AddParseListener(cl)
 
-	_ = ruleParser.Feature()
+	_ = ruleParser.Expr()
 	return nil
 }
 
