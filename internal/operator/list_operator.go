@@ -78,7 +78,7 @@ func ListContainsOperate(left, right interface{}) (bool, error) {
 }
 
 func ListNotContainsOperate(left, right interface{}) (bool, error) {
-	res, err := ListContainsOperate(right, left)
+	res, err := ListContainsOperate(left, right)
 	if err != nil {
 		return false, err
 	}
