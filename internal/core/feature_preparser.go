@@ -355,7 +355,7 @@ func (f *featurePreParserVisitor) VisitNumConst(ctx *parser.NumConstContext) int
 }
 
 func (f *featurePreParserVisitor) VisitStrConst(ctx *parser.StrConstContext) interface{} {
-	return StrippingQuotation(ctx.StringType().GetText())
+	return tools.UnescapeString(StrippingQuotation(ctx.StringType().GetText()))
 }
 
 func (f *featurePreParserVisitor) VisitBoolConst(ctx *parser.BoolConstContext) interface{} {
