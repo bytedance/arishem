@@ -120,6 +120,12 @@ func WithCustomSubConditionConfig(sc SubConditionManage) Option {
 	}
 }
 
+func WithFloatFirstNumberCompare(ff bool) Option {
+	return func(cfg *Configuration) {
+		cfg.FloatFirst = ff
+	}
+}
+
 type defaultSubConditionManage struct {
 	lock     sync.RWMutex
 	ExprDict map[string]string

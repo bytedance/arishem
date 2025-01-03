@@ -22,7 +22,19 @@ import (
 	"github.com/bytedance/arishem/tools"
 	"math/big"
 	"strings"
+	"sync"
 )
+
+var (
+	floatFirst = false
+	once       sync.Once
+)
+
+func SetFloatFirst(ff bool) {
+	once.Do(func() {
+		floatFirst = ff
+	})
+}
 
 // CompareOperator will invoke func(cmp int) bool
 type CompareOperator struct {
@@ -53,6 +65,15 @@ func LessOrEqualOperate(cmp int) bool {
 	return cmp <= 0
 }
 
+func (c *CompareOperator) floatFirstCompare(left interface{}, right interface{}) (bool, error) {
+	lv, _ := tools.ConvToFloat64(left)
+	rv, err := tools.ConvToFloat64(right)
+	if err != nil {
+		return false, fmt.Errorf("[use float-first] right type to float error, right(%T,%v)", right, right)
+	}
+	return c.opr(big.NewFloat(lv).Cmp(big.NewFloat(rv))), nil
+}
+
 // Operate the left and value whether valid by opr, will convert left to right type implicit.
 func (c *CompareOperator) Operate(left, right interface{}) (bool, error) {
 	if c.opr == nil {
@@ -61,6 +82,9 @@ func (c *CompareOperator) Operate(left, right interface{}) (bool, error) {
 	// convert to left type to right type
 	switch right.(type) {
 	case int, int8, int16, int32, int64:
+		if floatFirst && tools.IsFloatNumber(left) {
+			return c.floatFirstCompare(left, right)
+		}
 		lv, err := tools.ConvToInt64(left)
 		if err != nil {
 			return false, fmt.Errorf("left to right type(int) error, left(%T,%v)", left, left)
@@ -74,6 +98,9 @@ func (c *CompareOperator) Operate(left, right interface{}) (bool, error) {
 			return c.opr(+1), nil
 		}
 	case uint, uint8, uint16, uint32, uint64:
+		if floatFirst && tools.IsFloatNumber(left) {
+			return c.floatFirstCompare(left, right)
+		}
 		lv, err := tools.ConvToUint64(left)
 		if err != nil {
 			return false, fmt.Errorf("left to right type(uint) error, left(%T,%v)", left, left)
