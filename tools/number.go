@@ -37,6 +37,25 @@ func IsNumber(target interface{}) bool {
 	}
 }
 
+func IsFloatNumber(target interface{}) bool {
+	if target == nil {
+		return false
+	}
+	switch t := target.(type) {
+	case float32, float64:
+		return true
+	case string:
+		// a string first has '.' or 'eE' before it can be a float number
+		if strings.Contains(t, ".") || strings.ContainsAny(t, "eE") {
+			_, err := strconv.ParseFloat(t, 64)
+			return err == nil
+		}
+		return false
+	default:
+		return false
+	}
+}
+
 // StringToNumber convert string to number type, float format will be converted to float64 which support scientific format,
 // and a signed number will be converted to int64, unsigned number will be converted to uint64.
 func StringToNumber(numStr string) (num interface{}, err error) {

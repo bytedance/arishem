@@ -19,6 +19,7 @@ package arishem
 import (
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/bytedance/arishem/internal/core"
+	"github.com/bytedance/arishem/internal/operator"
 	"github.com/bytedance/arishem/typedef"
 	"sync"
 )
@@ -63,6 +64,9 @@ type Configuration struct {
 
 	// sub condition configuration
 	SubCond SubConditionManage
+
+	// when float first set to true, compare operator will judge any of float number between left and right, and use float64 to compare
+	FloatFirst bool
 }
 
 func (c *Configuration) getConditionFinder() func(string) (antlr.ParseTree, error) {
@@ -119,6 +123,7 @@ func Initialize(cfg *Configuration, opts ...Option) {
 		ApplyOptions(arishemConfiguration, opts...)
 		core.SetFeaturePreParseCache(arishemConfiguration.FeatVisitCache)
 		core.SetFeatureFetchPool(arishemConfiguration.FeatureFetchPool)
+		operator.SetFloatFirst(arishemConfiguration.FloatFirst)
 	})
 }
 
