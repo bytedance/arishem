@@ -79,6 +79,10 @@ func (c *CompareOperator) Operate(left, right interface{}) (bool, error) {
 	if c.opr == nil {
 		return false, errors.New("compare operator is nil")
 	}
+	// return error when any of right and left is null
+	if left == nil || right == nil {
+		return false, fmt.Errorf("nil compare not support. left: %v, right: %v", left, right)
+	}
 	// convert to left type to right type
 	switch right.(type) {
 	case int, int8, int16, int32, int64:
