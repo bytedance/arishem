@@ -63,3 +63,19 @@ func (m *MyFeatureFetcher) GetFetchObservers() []typedef.FeatureFetchObserver {
 ExecuteRules(rules, dc,WithFeatureFetchObserver(observer))
 ```
 
+
+- 新的judgeNode类型：ForeachJudgeNode
+如果你使用了arishem FOREACH 操作符的能力，你可能需要在判断回调中，得到foreach操作过程的具体详情，如: foreach的操作符、逻辑表达式, 每个item的值是什么以及它是否符合当前foreach的判断. 
+你可以在OnJudgeNodeVisitEnd回调中，判断JudgeNode的具体类型，来尝试获取Foreach的记录
+```go
+func (t *testArisVisitObserver) OnJudgeNodeVisitEnd(ctx context.Context, info typedef.JudgeNode, vt typedef.VisitTarget) {
+    foreachNode, ok := info.(typedef.ForeachJudgeNode)
+    if ok {
+        itemsStr, _ := json.Marshal(foreachNode.ForeachItems())
+        logger.Infof("[ForeachJudgeNode] left: %v, leftExpr: %v, right: %v, rightExpr: %v, operator: %v, target: %v, err: %v, foreachOperator: %v, foreachLogic: %v, foreachItems: %v",
+            foreachNode.Left(), info.LeftExpr(), foreachNode.Right(), info.RightExpr(), foreachNode.Operator(), vt.Identifier(), foreachNode.Error(),
+            foreachNode.ForeachOperator(), foreachNode.ForeachLogic(), string(itemsStr),
+        )
+    }
+}
+```
