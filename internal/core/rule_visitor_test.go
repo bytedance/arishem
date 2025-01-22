@@ -22,6 +22,7 @@ import (
 	"github.com/bytedance/arishem/internal/parser"
 	"github.com/bytedance/arishem/typedef"
 	"github.com/bytedance/gopkg/util/logger"
+	"github.com/bytedance/sonic"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -63,9 +64,18 @@ func (t *testArisVisitObserver) HashCode() string {
 
 func (t *testArisVisitObserver) OnJudgeNodeVisitEnd(ctx context.Context, info typedef.JudgeNode, vt typedef.VisitTarget) {
 	if info != nil {
-		logger.Infof("left: %v, leftExpr: %v, right: %v, rightExpr: %v, operator: %v, target: %v, err: %v",
-			info.Left(), info.LeftExpr(), info.Right(), info.RightExpr(), info.Operator(), vt.Identifier(), info.Error(),
-		)
+		foreachNode, ok := info.(typedef.ForeachJudgeNode)
+		if !ok {
+			logger.Infof("left: %v, leftExpr: %v, right: %v, rightExpr: %v, operator: %v, target: %v, err: %v",
+				info.Left(), info.LeftExpr(), info.Right(), info.RightExpr(), info.Operator(), vt.Identifier(), info.Error(),
+			)
+		} else {
+			itemsStr, _ := sonic.MarshalString(foreachNode.ForeachItems())
+			logger.Infof("[ForeachJudgeNode] left: %v, leftExpr: %v, right: %v, rightExpr: %v, operator: %v, target: %v, err: %v, foreachOperator: %v, foreachLogic: %v, foreachItems: %v",
+				foreachNode.Left(), info.LeftExpr(), foreachNode.Right(), info.RightExpr(), foreachNode.Operator(), vt.Identifier(), foreachNode.Error(),
+				foreachNode.ForeachOperator(), foreachNode.ForeachLogic(), itemsStr,
+			)
+		}
 	}
 }
 
@@ -216,7 +226,7 @@ func TestConditionVisit(t *testing.T) {
 				assert.Empty(t, errMsg)
 			},
 		}, {
-			"CONDITION: [pass] logic math operator by LrMath",
+			"CONDITION: [Pass] logic math operator by LrMath",
 			`{"is_latest": true}`,
 			`{"OpLogic":"AND","Conditions":[{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"==","Lhs":{"Const":{"NumConst":1.1232}},"Rhs":{"Const":{"NumConst":1.1232}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"!=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<","Lhs":{"Const":{"NumConst":-1}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}}]}`,
 			func(pass bool, errMsg []string) {
@@ -224,7 +234,7 @@ func TestConditionVisit(t *testing.T) {
 				assert.Empty(t, errMsg)
 			},
 		}, {
-			"CONDITION: [not pass] logic math operator by LrMath",
+			"CONDITION: [not Pass] logic math operator by LrMath",
 			`{"is_latest": true}`,
 			`{"OpLogic":"AND","Conditions":[{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"!=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"!=","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">","Lhs":{"Const":{"NumConst":10}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<","Lhs":{"Const":{"NumConst":-1}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":">=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}},{"Operator":"==","Lhs":{"VarExpr":"is_latest"},"Rhs":{"MathExpr":{"OpMath":"<=","Lhs":{"Const":{"NumConst":8}},"Rhs":{"Const":{"NumConst":8}}}}}]}`,
 			func(pass bool, errMsg []string) {
@@ -484,7 +494,7 @@ func TestForeach(t *testing.T) {
 		}, {
 			"SUB CONDITION: judge with FOREACH VALID sub condition operator: PASS",
 			`{"item_info":{"item_list":[{"name":"name@1","price":100},{"name":"name@2","price":102.13},{"name":"name@3","price":200},{"name":"name@4","price":100},{"name":"name@5","price":101},{"name":"name@6","price":303.1234}]}}`,
-			`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH SUB_COND &&","Lhs":{"VarExpr":"item_info.item_list"},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
+			`{"OpLogic":"&&","Conditions":[{"Operator":"FOREACH SUB_COND ||","Lhs":{"VarExpr":"item_info.item_list"},"Rhs":{"SubCondExpr":{"CondName":"MyCond"}}}]}`,
 			func(_ string) (antlr.ParseTree, error) {
 				return parser.ParseArishemCondition(`{"OpLogic":"&&","Conditions":[{"Operator":">","Lhs":{"VarExpr":"price"},"Rhs":{"Const":{"NumConst":10}}},{"Operator":"STRING_CONTAINS","Lhs":{"VarExpr":"name"},"Rhs":{"Const":{"StrConst":"name@"}}}]}`)
 			},

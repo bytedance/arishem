@@ -30,6 +30,8 @@ import (
 	"strings"
 )
 
+const foreachKey = "FOREACH"
+
 type simpleVisitTarget struct {
 	name string
 }
@@ -242,54 +244,66 @@ func (a *arishemRuleVisitor) VisitFullCondition(ctx *parser.FullConditionContext
 	left := a.Visit(lhsExpr)
 	right := a.Visit(rhsExpr)
 
-	pass := false
+	var pass = false
 	var err error
-
-	const foreachKey = "FOREACH"
+	var cdtInfo typedef.JudgeNode
 
 	if !strings.HasPrefix(opr, foreachKey) {
 		pass, err = evaluateLR(a, left, right, opr)
+		cdtInfo = newArishemCondition(pass, left, lhsExpr.GetText(), right, rhsExpr.GetText(), opr, err)
 	} else {
-		// execute the foreach operator
-		// check the left type whether array or not
-		var lArray []interface{}
-		lArray, err = tools.ConvToSliceUnifyType(left)
-		if err == nil {
-			// parse the operator, arishem grammar guarantee that here are at least two space
-			const space = " "
-			firstSpace := strings.Index(opr, space)
-			lastSpace := strings.LastIndex(opr, space)
-			foreachOpr := opr[firstSpace+1 : lastSpace]
-			if strings.HasPrefix(foreachOpr, foreachKey) {
-				err = errors.New("nested foreach operation is not supported")
-			} else {
-				logicOpr := toStdLogic(opr[lastSpace+1:])
-				for _, lVal := range lArray {
-					pass, err = evaluateLR(a, lVal, right, foreachOpr)
-					if err != nil {
-						break
-					}
-					if logicOpr == logicAnd && pass == false {
-						break
-					}
-					if logicOpr == logicOr && pass == true {
-						break
-					}
-				}
-			}
-		}
+		// parse operator and logic
+		const space = " "
+		firstSpace := strings.Index(opr, space)
+		lastSpace := strings.LastIndex(opr, space)
+		foreachOpr := opr[firstSpace+1 : lastSpace]
+		logicOpr := toStdLogic(opr[lastSpace+1:])
+		// execute the foreach condition
+		var foreachItems []typedef.ForeachItem
+		foreachItems, pass, err = a.visitForeachConditionInner(left, right, foreachOpr, logicOpr)
+		cdtInfo = newArishemForeachCondition(pass, left, lhsExpr.GetText(), right, rhsExpr.GetText(), opr, err, foreachOpr, logicOpr, foreachItems)
 	}
 	if err != nil {
 		a.errorCallback(node, err.Error())
 	}
 	// put it into cache
-	cdtInfo := newArishemCondition(pass, left, lhsExpr.GetText(), right, rhsExpr.GetText(), opr, err)
 	a.dataCtx.Set(ctx.GetAltNumber(), cdtInfo)
 	// observers call back
 	for _, obsr := range a.observers {
 		obsr.OnJudgeNodeVisitEnd(a.dataCtx.Context(), cdtInfo, a.visitTarget)
 	}
 	return pass
+}
+
+// execute the foreach operator judgement
+func (a *arishemRuleVisitor) visitForeachConditionInner(left, right interface{}, foreachOpr, logicOpr string) ([]typedef.ForeachItem, bool, error) {
+	if strings.HasPrefix(foreachOpr, foreachKey) {
+		return nil, false, errors.New("nested foreach operation is not supported")
+	}
+	// check the left type whether array or not
+	lArray, err := tools.ConvToSliceUnifyType(left)
+	if err != nil {
+		return nil, false, errors.New("foreach operation is supported only when left is slice/array type")
+	}
+	// parse the operator, arishem grammar guarantee that here are at least two space
+	items := make([]typedef.ForeachItem, 0, len(lArray)/2+1)
+	pass := false
+	for i, lVal := range lArray {
+		pass, err = evaluateLR(a, lVal, right, foreachOpr)
+
+		items = append(items, newArishemForeachItem(i, lVal, pass))
+
+		if err != nil {
+			break
+		}
+		if logicOpr == logicAnd && pass == false {
+			break
+		}
+		if logicOpr == logicOr && pass == true {
+			break
+		}
+	}
+	return items, pass, err
 }
 
 func (a *arishemRuleVisitor) VisitNullCondition(_ *parser.NullConditionContext) interface{} {
@@ -706,7 +720,7 @@ func evaluateLR(ori *arishemRuleVisitor, left, right interface{}, opr string) (b
 			return false, errors.New("sub condition right type is not sub condition expression")
 		}
 		pass, err = evaluateSubCond(ori, rSubCond.name, lData, rSubCond.tree)
-		// if err is not nil, pass will have to be false
+		// if err is not nil, Pass will have to be false
 		if err == nil && (strings.HasPrefix(opr, "!") || strings.HasPrefix(opr, "NOT")) {
 			// revert the judge result
 			pass = !pass

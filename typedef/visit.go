@@ -34,6 +34,19 @@ type JudgeNode interface {
 	Error() error
 }
 
+type ForeachItem interface {
+	Idx() int
+	ItemValue() interface{}
+	Passed() bool
+}
+
+type ForeachJudgeNode interface {
+	JudgeNode
+	ForeachOperator() string
+	ForeachLogic() string
+	ForeachItems() []ForeachItem
+}
+
 // ActionAim is the interface that defines the aim of action.
 type ActionAim interface {
 	ActionName() string
