@@ -77,3 +77,76 @@ func (a *arishemCondition) Operator() string {
 func (a *arishemCondition) Error() error {
 	return a.error
 }
+
+type arishemForeachItem struct {
+	Index   int
+	ItemVal interface{}
+	Pass    bool
+}
+
+func (a *arishemForeachItem) Idx() int {
+	return a.Index
+}
+
+func (a *arishemForeachItem) ItemValue() interface{} {
+	return a.ItemVal
+}
+
+func (a *arishemForeachItem) Passed() bool {
+	return a.Pass
+}
+
+func newArishemForeachItem(idx int, itemVal interface{}, pass bool) typedef.ForeachItem {
+	return &arishemForeachItem{
+		Index:   idx,
+		ItemVal: itemVal,
+		Pass:    pass,
+	}
+}
+
+type arishemForeachCondition struct {
+	*arishemCondition
+	foreachOperator string
+	foreachLogic    string
+	leftItems       []typedef.ForeachItem
+}
+
+func newArishemForeachCondition(
+	passed bool,
+	left interface{},
+	leftExpr string,
+	right interface{},
+	rightExpr string,
+	operator string,
+	error error,
+	foreachOperator string,
+	foreachLogic string,
+	foreachItems []typedef.ForeachItem,
+) typedef.JudgeNode {
+	return &arishemForeachCondition{
+		arishemCondition: &arishemCondition{
+			passed:    passed,
+			left:      left,
+			leftExpr:  leftExpr,
+			right:     right,
+			rightExpr: rightExpr,
+			operator:  operator,
+			error:     error,
+		},
+		foreachOperator: foreachOperator,
+		foreachLogic:    foreachLogic,
+		leftItems:       foreachItems,
+	}
+}
+
+func (a *arishemForeachCondition) ForeachLogic() string {
+	return a.foreachLogic
+}
+
+func (a *arishemForeachCondition) ForeachOperator() string {
+	return a.foreachOperator
+}
+
+func (a *arishemForeachCondition) ForeachItems() []typedef.ForeachItem {
+	return a.leftItems
+}
