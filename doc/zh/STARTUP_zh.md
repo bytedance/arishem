@@ -151,3 +151,7 @@ err := arishem.AddSubCondition(${name1}, ${expression1}, ${name2}, ${expression2
 - GetConditionTree -> 定义arishem如何通过条件名称来获取该条件的解析树
 - RuleIdentityMapAsCondName -> 告诉arishem在解析规则时，是否将规则的identity作为其条件的名称进行存储, arishem默认为true
 - WhenConditionParsed -> 该方法会在调用AddSubCondition方法成功解析一段条件表达式后回调，或者在启用了RuleIdentityMapAsCondName的情况下，成功解析规则后进行回调，在这个方法里，业务可以自定实现条件名称和解析树的查找关系
+
+### WithFloatFirstNumberCompare(true)
+arishem进行数字比较时，会以右值的类型为标准，并尝试将左值类型转化和右值一致，这就导致如果右值配置整数，而左值传入浮点，
+在转换时左值被转换成整数，从而丢失精度，如果WithFloatFirstNumberCompare方法传为true,arishem就会在两个数字判断的时候优先识别左值是否是浮点类型，而不是直接根据右值进行类型转换,传入false则不改变arishem原有的判断行为
