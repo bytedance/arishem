@@ -34,7 +34,7 @@ func init() {
 
 #### WithDefTreeCache
 
-TreeCache是arishem解析规则时使用的缓存，加上这个缓存后，arishem在解析到同一个条件/目的表达式时，将不再调用Antlr4的解析方法，直接从缓存中获取，默认512条。
+TreeCache是arishem解析规则时使用的缓存，加上这个缓存后，arishem在解析到同一个条件/目的表达式时，将不再调用Antlr4的解析方法，直接从缓存中获取，默认256条。
 
 如果要实现自定义的解析树缓存池，实现TreeCache接口即可
 ```go
